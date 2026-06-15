@@ -1,0 +1,163 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+enum Role {
+  FREE
+  PRO
+  TEAM_MEMBER
+  TEAM_ADMIN
+  SUPER_ADMIN
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  ownerId   String   @unique
+  owner     User     @relation("TeamOwner", fields: [ownerId], references: [id])
+  seats     Int      @default(1)
+  plan      String   @default("FREE")
+  members   User[]   @relation("TeamMembers")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id              String        @id @default(cuid())
+  email           String        @unique
+  name            String?
+  passwordHash    String?
+  authProvider    String        @default("local") // "local" or "google"
+  emailVerifiedAt DateTime?
+  role            Role          @default(FREE)
+  teamId          String?
+  team            Team?         @relation("TeamMembers", fields: [teamId], references: [id])
+  ownedTeam       Team?         @relation("TeamOwner")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  emails          Email[]
+  digestCaches    DigestCache[]
+  followUps       FollowUp[]
+}
+
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String   // email address
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, token])
+}
+
+model Email {
+  id            String                       @id @default(cuid())
+  userId        String
+  user          User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  corsairId     String                       @unique
+  subject       String
+  body          String                       @db.Text
+  from          String
+  to            String
+  date          DateTime
+  isRead        Boolean                      @default(false)
+  priorityLevel String?
+  embedding     Unsupported("vector(1536)")?
+  createdAt     DateTime                     @default(now())
+  updatedAt     DateTime                     @updatedAt
+  followUps     FollowUp[]
+
+  @@index([userId])
+}
+
+model DigestCache {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime
+  summary   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
+}
+
+model FollowUp {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailId     String?
+  email       Email?   @relation(fields: [emailId], references: [id], onDelete: SetNull)
+  action      String
+  scheduledAt DateTime
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([emailId])
+}
+
+model WebhookLog {
+  id         String   @id @default(cuid())
+  provider   String
+  eventType  String
+  payload    Json
+  processed  Boolean  @default(false)
+  receivedAt DateTime @default(now())
+
+  @@index([processed])
+}
+
+model CorsairIntegration {
+  id         String   @id
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  name       String
+  config     Json
+  dek        String?
+
+  @@map("corsair_integrations")
+}
+
+model CorsairAccount {
+  id             String   @id
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  tenant_id      String
+  integration_id String
+  config         Json
+  dek            String?
+
+  @@map("corsair_accounts")
+}
+
+model CorsairEntity {
+  id          String   @id
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  account_id  String
+  entity_id   String
+  entity_type String
+  version     String
+  data        Json
+
+  @@map("corsair_entities")
+}
+
+model CorsairEvent {
+  id         String   @id
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  account_id String
+  event_type String
+  payload    Json
+  status     String?
+
+  @@map("corsair_events")
+}
