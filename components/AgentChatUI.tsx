@@ -40,9 +40,7 @@ export function AgentChatUI({
     api: '/api/chat',
     initialMessages: [],
   });
-  // Messages section ke andar top pe daal do
-  console.log('Current Messages:', messages);
-  console.log('Last Message:', messages[messages.length - 1]);
+
   const isLoading = status === 'submitted' || status === 'streaming' || status === 'generating';
 
   useEffect(() => {
@@ -131,37 +129,32 @@ export function AgentChatUI({
                 <Bot className="w-4 h-4 text-[#1E4C82]" />
               )}
             </div>
-
             <div className="flex-1 min-w-0 space-y-2">
               <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
                 {m.role === 'user' ? 'You' : 'Agent'}
               </div>
 
-              {m.content && m.content.length > 0 && (
-                <div
-                  className={`rounded-2xl p-4 text-[14px] leading-relaxed break-words shadow-sm ${m.role === 'user' ? 'bg-white border border-zinc-200 text-zinc-900' : 'bg-[#CBE4FF] border border-[#B4D7FF] text-[#1E4C82]'}`}
-                >
-                  {m.content}
-                </div>
-              )}
+              {/* New improved rendering */}
+              <div
+                className={`rounded-2xl p-4 text-[14px] leading-relaxed break-words shadow-sm ${m.role === 'user' ? 'bg-white border border-zinc-200 text-zinc-900' : 'bg-[#CBE4FF] border border-[#B4D7FF] text-[#1E4C82]'}`}
+              >
+                {m.content ? (
+                  <div>{m.content}</div>
+                ) : m.parts ? (
+                  m.parts.map((part: any, i: number) => {
+                    console.log('PART:', part); // ye line add karo
+                    if (part.type === 'text' && part.text) {
+                      return <div key={i}>{part.text}</div>;
+                    }
+                    // Agar tool calls etc. hain to ignore for now (tumhara ActionLog already handle kar raha hai)
+                    return null;
+                  })
+                ) : (
+                  <div className="text-zinc-400 italic">No content</div>
+                )}
+              </div>
 
-              {(!m.content || m.content.length === 0) &&
-                m.parts &&
-                m.parts.map((p: any, i: number) => {
-                  if (p.type === 'text' && p.text) {
-                    return (
-                      <div
-                        key={i}
-                        className={`rounded-2xl p-4 text-[14px] leading-relaxed break-words shadow-sm mt-2 ${m.role === 'user' ? 'bg-white border border-zinc-200 text-zinc-900' : 'bg-[#CBE4FF] border border-[#B4D7FF] text-[#1E4C82]'}`}
-                      >
-                        {p.text}
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
-
-              {/* MCP Action Log parsed from stream */}
+              {/* Action Log (existing) */}
               {(() => {
                 const tools =
                   m.toolInvocations ||
@@ -169,34 +162,32 @@ export function AgentChatUI({
                     ? m.parts.filter(
                         (p: any) =>
                           p.type === 'tool-invocation' ||
-                          p.type === 'dynamic-tool' ||
-                          p.type === 'tool'
+                          p.type === 'tool' ||
+                          p.type === 'dynamic-tool'
                       )
                     : []);
-                if (tools.length > 0) {
-                  return <ActionLog toolInvocations={tools} />;
-                }
-                return null;
+                return tools.length > 0 ? <ActionLog toolInvocations={tools} /> : null;
               })()}
             </div>
           </div>
         ))}
-        {isLoading && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
+        {isLoading && (
           <div className="flex gap-4">
             <div className="w-8 h-8 rounded-full bg-[#CBE4FF] flex items-center justify-center shrink-0">
               <Bot className="w-4 h-4 text-[#1E4C82]" />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1">
               <div className="flex items-center gap-2 pt-2">
                 <div className="flex items-end gap-1 h-3">
                   {[1, 2, 3].map((i) => (
                     <div
                       key={i}
-                      className="w-1 bg-[#1E4C82] rounded-full h-full animate-pulse opacity-60"
+                      className="w-1 bg-[#1E4C82] rounded-full h-full animate-pulse"
                       style={{ animationDelay: `${i * 150}ms` }}
                     />
                   ))}
                 </div>
+                <span className="text-xs text-zinc-500">Agent soch raha hai...</span>
               </div>
             </div>
           </div>

@@ -62,7 +62,7 @@ export default function Sidebar() {
         </div>
         <div className="flex flex-col">
           <span className="text-[18px] font-bold text-zinc-900 tracking-tight leading-tight">
-            Meridian
+            ZeroClick
           </span>
         </div>
       </div>

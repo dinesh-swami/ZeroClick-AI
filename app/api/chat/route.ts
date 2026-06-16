@@ -77,8 +77,8 @@ Never invent information if you can use a tool to fetch it.`;
       tools,
       stopWhen: stepCountIs(5),
     });
-
-    return result.toTextStreamResponse();
+    console.log(result.toUIMessageStreamResponse());
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error('API Agent route error:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
