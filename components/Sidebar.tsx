@@ -4,9 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Inbox, Calendar, Bot, Settings, List, LogOut, LayoutGrid } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-
-// eslint-disable-next-line react-hooks/rules-of-hooks
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -20,7 +17,7 @@ export default function Sidebar() {
     { name: 'Agent', href: '/agent', icon: Bot },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
-  const router = useRouter();
+
   // Extract user initials
   const initials = user?.name
     ? user.name
@@ -34,7 +31,7 @@ export default function Sidebar() {
   return (
     <div
       style={{ width: sidebarWidth }}
-      className="flex h-full flex-col bg-[#111111] border-r border-[#222] shrink-0 relative"
+      className="flex h-full flex-col bg-[#F9FAFB] border-r border-zinc-200 shrink-0 relative"
     >
       {/* Resize Handle */}
       <div
@@ -59,19 +56,13 @@ export default function Sidebar() {
         }}
       />
       {/* Brand */}
-      <div
-        className=" flex h-20 items-center px-5 gap-0 shrink-0"
-        onClick={() => router.push('/inbox')}
-      >
-        <div className="cursor-pointer hover:bg-zinc-800 transition-colors w-18 h-18 flex items-center justify-center shrink-0">
-          <img src="/zeroclick-logo.png" alt="Logo" className="w-55 h-16 " />
+      <div className="flex h-20 items-center px-5 gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0 shadow-md">
+          <LayoutGrid className="w-4 h-4 text-white" />
         </div>
-        <div className="cursor-pointer hover:bg-zinc-800 transition-colors flex flex-col">
-          <span className="text-[15px] font-bold text-white tracking-tight leading-tight">
-            ZeroClick
-          </span>
-          <span className="text-[10px] font-bold text-zinc-500 tracking-[0.1em] uppercase">
-            No clicks
+        <div className="flex flex-col">
+          <span className="text-[18px] font-bold text-zinc-900 tracking-tight leading-tight">
+            Meridian
           </span>
         </div>
       </div>
@@ -89,8 +80,8 @@ export default function Sidebar() {
                 href={item.href}
                 className={`group flex items-center rounded-xl px-3 py-2 text-[14px] font-medium transition-colors ${
                   isActive
-                    ? 'bg-[#1a1a1a] text-white'
-                    : 'text-zinc-400 hover:bg-[#151515] hover:text-zinc-200'
+                    ? 'bg-white text-blue-600 shadow-sm border border-zinc-200/50'
+                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
                 }`}
               >
                 <Icon
@@ -106,18 +97,20 @@ export default function Sidebar() {
       </div>
 
       {/* User */}
-      <div className="border-t border-[#222] p-3">
+      <div className="border-t border-zinc-200 p-3">
         <div className="flex items-center gap-3 px-2 py-1.5 cursor-pointer group">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-[12px] font-bold text-white shrink-0 shadow-md transition-transform group-hover:scale-105">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="truncate text-[14px] font-semibold text-white">{user?.name || 'User'}</p>
+            <p className="truncate text-[14px] font-semibold text-zinc-900">
+              {user?.name || 'User'}
+            </p>
             <p className="truncate text-[12px] text-zinc-500">{user?.email}</p>
           </div>
           <button
             onClick={logout}
-            className="p-1.5 text-zinc-500 hover:text-white hover:bg-[#222] rounded-md transition-colors"
+            className="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
             title="Log out"
           >
             <LogOut className="h-4 w-4" />

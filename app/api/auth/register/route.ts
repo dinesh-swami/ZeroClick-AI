@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     });
     // verfication link
     const verifyLink = `${appUrl}/api/auth/verify?token=${token}`;
-    console.log('Verification link:', verifyLink);
+    // console.log('Verification link:', verifyLink);
 
     // Send Email via Nodemailer
     const transporter = nodemailer.createTransport({
@@ -56,10 +56,7 @@ export async function POST(req: Request) {
         pass: process.env.GMAIL_APP_PASSWORD,
       },
     });
-    console.log(
-      'trasporter created....==================================================================='
-    );
-    console.log('gmail id========================== ', email);
+
     await transporter.sendMail({
       from: `ZeroClick <${process.env.GMAIL_USER}>`,
       to: email,
@@ -96,7 +93,6 @@ export async function POST(req: Request) {
     </div>
   `,
     });
-    console.log('email send succesfully ✅✅✅✅✅✅');
 
     return NextResponse.json(
       {

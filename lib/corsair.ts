@@ -1,18 +1,79 @@
 import 'dotenv/config';
-import { Pool } from 'pg';
-import { createCorsair } from 'corsair';
+import { createClient } from '@corsair-dev/app';
+import { createCorsair, setupCorsair } from 'corsair';
 import { gmail } from '@corsair-dev/gmail';
 import { googlecalendar } from '@corsair-dev/googlecalendar';
+import { Pool } from 'pg';
 
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is not set');
+}
+
+// The core self-hosted Corsair engine
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export const corsair = createCorsair({
-  plugins: [gmail(), googlecalendar()],
   database: pool,
-  kek: process.env.CORSAIR_KEK!,
+  kek: process.env.CORSAIR_KEK || 'default-kek-development',
+  plugins: [
+    gmail({
+      credentials: {
+        clientId: process.env.GOOGLE_CLIENT_ID || '',
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+        accessToken: process.env.GOOGLE_ACCESS_TOKEN || '',
+        refreshToken: process.env.GOOGLE_REFRESH_TOKEN || '',
+      },
+    }),
+    googlecalendar({
+      // googlecalendar plugin does not accept a `credentials` property in its options.
+      // Leave empty options so the plugin can use default auth flow or separate setup.
+    }),
+  ],
   multiTenancy: true,
 });
 
-export const getTenant = async (tenantId: string) => {
-  return corsair.withTenant(tenantId);
+let corsairSetupPromise: Promise<void> | null = null;
+
+export function ensureCorsairSetup() {
+  if (!corsairSetupPromise) {
+    corsairSetupPromise = setupCorsair(corsair, {
+      credentials: {
+        gmail: {
+          client_id: process.env.GOOGLE_CLIENT_ID || '',
+          client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+        },
+        googlecalendar: {
+          client_id: process.env.GOOGLE_CLIENT_ID || '',
+          client_secret: process.env.GOOGLE_CLIENT_SECRET || '',
+        },
+      },
+    })
+      .then(() => undefined)
+      .catch((error) => {
+        corsairSetupPromise = null;
+        throw error;
+      });
+  }
+
+  return corsairSetupPromise;
+}
+// The client SDK pointed to our local self-hosted engine
+export const globalCorsairClient = createClient({
+  baseUrl: process.env.NEXT_PUBLIC_APP_URL
+    ? `${process.env.NEXT_PUBLIC_APP_URL}/api/corsair`
+    : 'http://localhost:3000/api/corsair',
+  apiKey: process.env.CORSAIR_API_KEY || 'local',
+});
+
+export class CorsairNotConnectedError extends Error {
+  constructor(message = 'User is not connected to Corsair') {
+    super(message);
+    this.name = 'CorsairNotConnectedError';
+  }
+}
+
+export const getCorsairClient = async (corsairUserId: string | null | undefined) => {
+  if (!corsairUserId) throw new CorsairNotConnectedError();
+
+  return corsair.withTenant(corsairUserId);
 };

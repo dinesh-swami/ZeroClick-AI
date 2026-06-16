@@ -6,7 +6,6 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_9ggxHgLs_HB9bev9UDQN2Hb1kr26gdwEe');
-console.log('RESEND_API_KEY: ', process.env.RESEND_API_KEY ? 'FOUND' : 'MISSING');
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
 export async function POST(req: Request) {
@@ -38,7 +37,7 @@ export async function POST(req: Request) {
     // Generate new Verification Token
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    console.log('STEP 1');
+  
 
     await prisma.verificationToken.create({
       data: {
@@ -47,10 +46,10 @@ export async function POST(req: Request) {
         expiresAt,
       },
     });
-    console.log('STEP 2');
+  
     // Send Email via Resend
     const verifyLink = `${appUrl}/api/auth/verify?token=${token}`;
-    console.log('STEP 3');
+
     // node mailer setup
 
     const transporter = nodemailer.createTransport({
@@ -60,7 +59,6 @@ export async function POST(req: Request) {
         pass: process.env.GMAIL_APP_PASSWORD,
       },
     });
-    console.log('STEP 4');
     await transporter.sendMail({
       from: `ZeroClick <${process.env.GMAIL_USER}>`,
       to: email,
@@ -97,7 +95,7 @@ export async function POST(req: Request) {
     </div>
   `,
     });
-    console.log('STEP 5');
+   
     return NextResponse.json(
       {
         message: 'Verification link resent.',

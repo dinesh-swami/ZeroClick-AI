@@ -29,22 +29,19 @@ export function useVoiceInput() {
         rec.onstart = () => setState('listening');
         rec.onresult = (event: any) => {
           let currentTranscript = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) {
+          for (let i = 0; i < event.results.length; i++) {
             currentTranscript += event.results[i][0].transcript;
           }
           setTranscript(currentTranscript);
         };
         rec.onerror = (event: any) => {
-          console.error('Speech recognition error', event.error);
+          console.error('Speech recognition error:', event.error);
+          alert(`Microphone error: ${event.error}. Please check your browser permissions.`);
           setState('error');
           setTimeout(() => setState('idle'), 3000);
         };
         rec.onend = () => {
-          if (state === 'listening') {
-            setState('processing');
-            // Simulate processing time
-            setTimeout(() => setState('idle'), 1000);
-          }
+          setState('idle');
         };
 
         setRecognition(rec);
@@ -55,13 +52,16 @@ export function useVoiceInput() {
   }, []);
 
   const startListening = useCallback(() => {
-    if (recognition) {
-      setTranscript('');
-      try {
-        recognition.start();
-      } catch (e) {
-        // Already started
-      }
+    if (!recognition) {
+      alert('Speech recognition is not supported in this browser.');
+      return;
+    }
+    setTranscript('');
+    try {
+      recognition.start();
+    } catch (e: any) {
+      console.error('Failed to start recognition:', e);
+      // Already started or other error
     }
   }, [recognition]);
 

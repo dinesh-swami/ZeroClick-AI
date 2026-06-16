@@ -5,7 +5,7 @@ import { getRefreshTokenCookie, verifyToken, generateAccessToken } from '@/lib/a
 export async function GET(req: Request) {
   try {
     const refreshToken = await getRefreshTokenCookie();
-    console.log('Refresh token from cookie:', refreshToken);
+    // console.log('Refresh token from cookie:', refreshToken);
     if (!refreshToken) {
       return NextResponse.json({ error: 'No refresh token' }, { status: 401 });
     }
