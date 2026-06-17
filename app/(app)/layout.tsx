@@ -5,7 +5,7 @@ import { AgentDockWrapper } from '@/components/AgentDockWrapper';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <ProtectedRoute>
-      <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
+      <div className="flex h-screen w-full overflow-hidden bg-black bg-background text-foreground">
         {/* Pane 1: Sidebar */}
         <Sidebar />
 

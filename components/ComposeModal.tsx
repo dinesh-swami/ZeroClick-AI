@@ -101,33 +101,37 @@ export default function ComposeModal({ onClose, onSend, replyTo }: ComposeModalP
     return null;
   };
 
+  function setIsAgentOpen(arg0: boolean): void {
+    throw new Error('Function not implemented.');
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm pointer-events-auto transition-opacity duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm pointer-events-auto transition-opacity duration-200 ">
       <div
-        className="w-[700px] bg-white border border-zinc-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
+        className=" w-[700px] bg-black border border-zinc-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden pointer-events-auto animate-in fade-in zoom-in-95 duration-200"
         onKeyDown={handleKeyDown}
       >
         {/* Header */}
-        <div className="p-5 flex items-center justify-between shrink-0 border-b border-zinc-100">
+        <div className="p-5 flex items-center justify-between shrink-0 border-b border-zinc-100 bg-orange-400">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center ">
               <Mail className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none mb-1.5">
+              <h2 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none mb-1.5 ">
                 Compose message
               </h2>
-              <p className="text-[12px] text-zinc-500 font-medium">Keyboard-centric draft window</p>
+              <p className="text-[12px] text-black font-medium">Keyboard-centric draft window</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-zinc-500 text-[12px] font-medium font-mono">
+          <div className="flex items-center gap-4 text-black text-[12px] font-medium font-mono">
             <button className="hover:text-zinc-900 transition-colors flex items-center gap-1">
               <AtSign className="w-3.5 h-3.5" />{' '}
             </button>
             <button className="hover:text-zinc-900 transition-colors tracking-wide">CC</button>
             <button className="hover:text-zinc-900 transition-colors tracking-wide">BCC</button>
-            <button onClick={onClose} className="hover:text-zinc-900 transition-colors ml-2">
-              <X className="h-4 w-4" />
+            <button onClick={onClose} className="hover:text-red-500 transition-colors ml-2">
+              <X className="h-7 w-7" />
             </button>
           </div>
         </div>
@@ -162,19 +166,19 @@ export default function ComposeModal({ onClose, onSend, replyTo }: ComposeModalP
           </div>
 
           {/* Message Area */}
-          <div className="flex-1 flex flex-col min-h-[300px]">
+          <div className="flex-1 flex flex-col min-h-[300px] ">
             <div className="flex items-center justify-between mb-3 px-1 text-zinc-500">
               <div className="flex items-center gap-2">
                 <PenLine className="w-3.5 h-3.5" />
                 <span className="text-[11px] font-bold tracking-[0.15em]">MESSAGE</span>
               </div>
-              <span className="text-[10px] font-bold tracking-[0.1em] flex items-center gap-1.5 font-mono">
+              <span className="text-[10px] font-bold tracking-[0.1em] flex items-center gap-1.5 font-mono ">
                 <span className="font-sans text-[12px] opacity-80">⌘ ↵</span> TO SEND
               </span>
             </div>
 
             <div
-              className="flex-1 bg-white border border-zinc-200 shadow-sm rounded-xl p-5 cursor-text overflow-y-auto flex flex-col"
+              className="flex-1 bg-black border border-zinc-200 shadow-sm rounded-xl p-5 cursor-text overflow-y-auto flex flex-col "
               onClick={(e) => {
                 if (e.target === e.currentTarget) {
                   bodyRef.current?.focus();
@@ -186,22 +190,24 @@ export default function ComposeModal({ onClose, onSend, replyTo }: ComposeModalP
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full bg-transparent text-zinc-900 text-[14px] font-bold focus:outline-none mb-4 placeholder:text-zinc-400"
+                className="w-full bg-transparent text-white text-[14px] font-bold focus:outline-none mb-4 placeholder:text-zinc-400 "
                 placeholder="Subject"
               />
-              <textarea
-                ref={bodyRef}
-                className="flex-1 outline-none text-zinc-800 text-[14px] bg-transparent resize-none placeholder:text-zinc-400 leading-relaxed"
-                placeholder="Write your message..."
-              />
+              <div className="border-t border-white/20 pt-3">
+                <textarea
+                  ref={bodyRef}
+                  className="flex-1 outline-none text-[14px] bg-transparent resize-none placeholder:text-zinc-400 leading-relaxed text-white"
+                  placeholder="Write your message..."
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-zinc-100 flex items-center justify-between bg-zinc-50 shrink-0">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-zinc-200 bg-white text-zinc-500 shadow-sm text-[11px] font-mono font-medium tracking-wide">
-            <span className="font-sans text-[13px] opacity-80">⌘ ↵</span> to send
+        <div className="px-5 py-4 border-t border-zinc-100 flex items-center justify-between  shrink-0  bg-black-100">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-zinc-200 bg-white text-black shadow-sm text-[13px] font-mono font-medium tracking-wide">
+            <span className="font-sans text-[13px] opacity-100">⌘ ↵</span> to send
           </div>
 
           <div className="flex items-center gap-5">
@@ -210,7 +216,7 @@ export default function ComposeModal({ onClose, onSend, replyTo }: ComposeModalP
               AI assist
             </button>
             <button
-              onClick={handleSend}
+              onClick={() => setIsAgentOpen(true)}
               disabled={isSending}
               className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm px-6 py-2 rounded-full text-[13px] font-semibold flex items-center gap-2 transition-colors disabled:opacity-50"
             >

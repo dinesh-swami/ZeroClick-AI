@@ -10,11 +10,11 @@ export default function LandingPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#F9FAFB] text-zinc-900 font-sans">
       <div className="max-w-2xl text-center space-y-8 px-4">
         <h1 className="text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-600">
-          Superhuman for Everyone
+          ZeroClick Ai for Everyone
         </h1>
         <p className="text-xl text-zinc-500">
-          The fastest email and calendar experience ever made. Powered by Corsair, integrated with
-          everything you need.
+          You can connect you email and calendar and it will give you experience ever made. Powered
+          by Corsair, integrated with everything you need.
         </p>
 
         <div className="pt-8 min-h-[80px]">

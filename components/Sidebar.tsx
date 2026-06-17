@@ -2,18 +2,33 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Inbox, Calendar, Bot, Settings, List, LogOut, LayoutGrid } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import {
+  Inbox,
+  Calendar,
+  Bot,
+  Settings,
+  List,
+  LogOut,
+  LayoutGrid,
+  Flame,
+  Box,
+  User,
+  ChevronDown,
+  Mic,
+  type LucideIcon,
+} from 'lucide-react';
 
+import { useAuth } from '@/hooks/useAuth';
+import '@/styles/side.css';
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [sidebarWidth, setSidebarWidth] = useState(220);
 
-  const navigation = [
+  const navigation: { name: string; href: string; icon: LucideIcon; badge?: string }[] = [
     { name: 'Inbox', href: '/inbox', icon: Inbox },
     { name: 'Calendar', href: '/calendar', icon: Calendar },
-    { name: 'Digest', href: '/digest', icon: List },
+    { name: 'Voice Agent (Soon...)', href: '/digest', icon: Mic },
     { name: 'Agent', href: '/agent', icon: Bot },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
@@ -29,20 +44,31 @@ export default function Sidebar() {
     : user?.email?.[0]?.toUpperCase() || 'U';
 
   return (
-    <div
-      style={{ width: sidebarWidth }}
-      className="flex h-full flex-col bg-[#F9FAFB] border-r border-zinc-200 shrink-0 relative"
-    >
+    <aside style={{ width: sidebarWidth }} className="zc-sidebar ">
+      {/* Ambient fire/smoke layers */}
+      <div className="zc-sidebar-bg  " aria-hidden="true">
+        <div className="zc-smoke zc-smoke-1" />
+        <div className="zc-smoke zc-smoke-2" />
+        <div className="zc-smoke zc-smoke-3" />
+        <div className="zc-fire-glow" />
+        <div className="zc-fire-base" />
+        <span className="zc-ember zc-ember-1" />
+        <span className="zc-ember zc-ember-2" />
+        <span className="zc-ember zc-ember-3" />
+        <span className="zc-ember zc-ember-4" />
+        <span className="zc-ember zc-ember-5" />
+      </div>
+
       {/* Resize Handle */}
       <div
-        className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-zinc-500/50 z-50 transition-colors"
+        className="zc-resize-handle"
         onMouseDown={(e) => {
           e.preventDefault();
           const startX = e.clientX;
           const startWidth = sidebarWidth;
           const onMouseMove = (moveEvent: MouseEvent) => {
             setSidebarWidth(
-              Math.max(150, Math.min(400, startWidth + (moveEvent.clientX - startX)))
+              Math.max(200, Math.min(400, startWidth + (moveEvent.clientX - startX)))
             );
           };
           const onMouseUp = () => {
@@ -55,68 +81,51 @@ export default function Sidebar() {
           document.body.style.cursor = 'col-resize';
         }}
       />
+
       {/* Brand */}
-      <div className="flex h-20 items-center px-5 gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0 shadow-md">
-          <LayoutGrid className="w-4 h-4 text-white" />
+      <div className="zc-brand">
+        <div className="zc-brand-icon">
+          <Flame className="zc-brand-flame" />
+          <span className="zc-brand-icon-glow" />
         </div>
-        <div className="flex flex-col">
-          <span className="text-[18px] font-bold text-zinc-900 tracking-tight leading-tight">
-            ZeroClick
-          </span>
-        </div>
+        <span className="zc-brand-text">ZeroClick</span>
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-2 px-3">
-        <nav className="space-y-1">
-          {navigation.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-            const Icon = item.icon;
+      <nav className="zc-nav">
+        {navigation.map((item) => {
+          const isActive = pathname.startsWith(item.href);
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`zc-nav-item ${isActive ? 'is-active' : ''}`}
+            >
+              {isActive && <span className="zc-nav-active-bar" />}
+              <Icon className="zc-nav-icon" />
+              <span className="zc-nav-label">{item.name}</span>
+              {item.badge && <span className="zc-nav-badge">{item.badge}</span>}
+            </Link>
+          );
+        })}
+      </nav>
 
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`group flex items-center rounded-xl px-3 py-2 text-[14px] font-medium transition-colors ${
-                  isActive
-                    ? 'bg-white text-blue-600 shadow-sm border border-zinc-200/50'
-                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'
-                }`}
-              >
-                <Icon
-                  className={`mr-3 h-[18px] w-[18px] flex-shrink-0 ${
-                    isActive ? 'text-blue-500' : 'text-zinc-500 group-hover:text-zinc-400'
-                  }`}
-                />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+      {/* Flame visual spacer (where the fire glow sits in the reference) */}
+      <div className="zc-flame-spacer" aria-hidden="true" />
 
-      {/* User */}
-      <div className="border-t border-zinc-200 p-3">
-        <div className="flex items-center gap-3 px-2 py-1.5 cursor-pointer group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-[12px] font-bold text-white shrink-0 shadow-md transition-transform group-hover:scale-105">
-            {initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="truncate text-[14px] font-semibold text-zinc-900">
-              {user?.name || 'User'}
-            </p>
-            <p className="truncate text-[12px] text-zinc-500">{user?.email}</p>
-          </div>
-          <button
-            onClick={logout}
-            className="p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
-            title="Log out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+      {/* User card */}
+      <div className="zc-user-card" onClick={logout} role="button" tabIndex={0}>
+        <div className="zc-user-avatar">
+          {initials}
+          <span className="zc-user-avatar-glow" />
         </div>
+        <div className="zc-user-info">
+          <p className="zc-user-name">{user?.name || 'Cleans'}</p>
+          <p className="zc-user-email">{user?.email || 'aali1100@gmail.com'}</p>
+        </div>
+        <ChevronDown className="zc-user-chevron" />
       </div>
-    </div>
+    </aside>
   );
 }

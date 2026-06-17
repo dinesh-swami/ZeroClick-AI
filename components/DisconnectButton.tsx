@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import '@/styles/disconnet.css';
 
 export function DisconnectButton({ integration, label }: { integration: string; label: string }) {
   const [loading, setLoading] = useState(false);
@@ -26,12 +27,13 @@ export function DisconnectButton({ integration, label }: { integration: string; 
   };
 
   return (
-    <button
-      onClick={handleDisconnect}
-      disabled={loading}
-      className="inline-flex items-center justify-center px-6 py-2.5 bg-[#FECDD3] text-[#881337] border border-[#FDA4AF] text-[15px] font-semibold rounded-full hover:bg-[#FDA4AF] transition-colors shadow-sm disabled:opacity-50"
-    >
-      {loading ? 'Disconnecting...' : `Disconnect ${label}`}
+    <button onClick={handleDisconnect} disabled={loading} className="disconnect-btn">
+      <span className="disconnect-btn__smoke" />
+      <span className="disconnect-btn__ember" />
+      <span className="disconnect-btn__ember" />
+      <span className="disconnect-btn__ember" />
+
+      <span className="disconnect-btn__text">{loading ? 'Disconnecting...' : ` ${label}`}</span>
     </button>
   );
 }

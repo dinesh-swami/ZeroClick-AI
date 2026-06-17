@@ -8,7 +8,8 @@ import ReadingPane from '@/components/ReadingPane';
 import CalendarSidebar from '@/components/CalendarSidebar';
 import ComposeModal from '@/components/ComposeModal';
 import ShortcutOverlay from '@/components/ShortcutOverlay';
-import { Search, SlidersHorizontal, RefreshCw, Edit } from 'lucide-react';
+import { Search, SlidersHorizontal, RefreshCw, Flame } from 'lucide-react';
+import '@/styles/inbox.css';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -23,13 +24,10 @@ export default function InboxPage() {
   const [isShortcutOverlayOpen, setIsShortcutOverlayOpen] = useState(false);
   const [sortOption, setSortOption] = useState<'NEWEST' | 'OLDEST' | 'UNREAD_FIRST'>('NEWEST');
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Debounce search query
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
+    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
@@ -39,7 +37,6 @@ export default function InboxPage() {
         if (pageIndex > 0) return null;
         return `/api/emails/search?q=${encodeURIComponent(debouncedSearchQuery)}`;
       }
-
       if (previousPageData && !previousPageData.nextCursor) return null;
       if (pageIndex === 0) return `/api/emails?limit=${limit}&view=${view}`;
       return `/api/emails?cursor=${previousPageData.nextCursor}&limit=${limit}&view=${view}`;
@@ -49,15 +46,6 @@ export default function InboxPage() {
 
   const { data, error, size, setSize, isValidating, mutate } = useSWRInfinite(getKey, fetcher, {
     revalidateOnFocus: false,
-  });
-
-  const { ref, inView } = useInView({
-    threshold: 0,
-    onChange: (inView) => {
-      if (inView && !isValidating && !isReachingEnd && !debouncedSearchQuery) {
-        setSize(size + 1);
-      }
-    },
   });
 
   const emails = data ? data.flatMap((page) => page.emails || []) : [];
@@ -84,10 +72,17 @@ export default function InboxPage() {
       (data && data[data.length - 1]?.emails?.length < limit) ||
       (data && !data[data.length - 1]?.nextCursor);
 
-  // SSE Realtime Updates
+  const { ref } = useInView({
+    threshold: 0,
+    onChange: (inView) => {
+      if (inView && !isValidating && !isReachingEnd && !debouncedSearchQuery) {
+        setSize(size + 1);
+      }
+    },
+  });
+
   useEffect(() => {
     if (debouncedSearchQuery) return;
-
     const eventSource = new EventSource('/api/sse');
     eventSource.onmessage = (event) => {
       try {
@@ -95,10 +90,7 @@ export default function InboxPage() {
         mutate((currentData: any) => {
           if (!currentData) return currentData;
           const newData = [...currentData];
-          newData[0] = {
-            ...newData[0],
-            emails: [newEmail, ...newData[0].emails],
-          };
+          newData[0] = { ...newData[0], emails: [newEmail, ...newData[0].emails] };
           return newData;
         }, false);
       } catch (e) {
@@ -110,7 +102,6 @@ export default function InboxPage() {
 
   const removeEmailOptimistically = async (id: string, action: 'archive' | 'delete') => {
     if (selectedEmailId === id) setSelectedEmailId(null);
-
     await mutate((currentData: any) => {
       if (!currentData) return currentData;
       return currentData.map((page: any) => ({
@@ -118,7 +109,6 @@ export default function InboxPage() {
         emails: page.emails.filter((e: any) => e.id !== id),
       }));
     }, false);
-
     try {
       const res = await fetch(`/api/emails/${id}/${action}`, { method: 'POST' });
       if (!res.ok) throw new Error(`Failed to ${action}`);
@@ -156,7 +146,6 @@ export default function InboxPage() {
     });
   };
 
-  // Global keyboard shortcuts
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if (
@@ -190,7 +179,7 @@ export default function InboxPage() {
         case 'Escape':
           e.preventDefault();
           setSelectedEmailId(null);
-          break; // Close reading pane
+          break;
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
@@ -198,148 +187,167 @@ export default function InboxPage() {
   }, [selectedEmailId, handleArchive, handleReply]);
 
   const tabs = [
-    { id: 'INBOX', label: 'Inbox' },
+    { id: 'INBOX', label: 'Primary' },
     { id: 'ARCHIVED', label: 'Archived' },
     { id: 'SENT', label: 'Sent' },
     { id: 'SPAM', label: 'Spam' },
   ] as const;
 
   return (
-    <div className="flex flex-1 overflow-hidden bg-white w-full h-full">
-      {/* Pane 2: Email List (Main Content) */}
-      <div className="flex-1 flex flex-col h-full relative border-r border-zinc-200">
-        {/* Header (Top Nav) */}
-        <div className="h-[72px] flex items-center justify-between px-6 border-b border-zinc-200 shrink-0">
-          <h1 className="text-[28px] font-bold text-zinc-900 tracking-tight">Inbox</h1>
-
-          <div className="flex items-center gap-4">
-            {/* Search Pill */}
-            <div className="relative flex items-center w-[240px]">
-              <Search className="absolute left-3 w-4 h-4 text-zinc-400" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search something..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-10 py-2 bg-white border border-zinc-200 rounded-full text-[13px] text-zinc-900 placeholder-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              />
-              <div className="absolute right-3 flex items-center gap-0.5">
-                <kbd className="font-sans text-[11px] font-medium text-zinc-400">⌘</kbd>
-                <kbd className="font-sans text-[11px] font-medium text-zinc-400">S</kbd>
-              </div>
-            </div>
-
-            {/* Filter / Refresh Icons */}
-            <div className="flex items-center gap-2 relative">
-              <button
-                onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
-                className={`p-2 rounded-full border text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors shadow-sm ${isSortMenuOpen ? 'bg-zinc-50 border-zinc-300 text-zinc-900' : 'border-zinc-200'}`}
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-              </button>
-
-              {isSortMenuOpen && (
-                <div className="absolute top-12 left-0 w-48 bg-white border border-zinc-200 rounded-xl shadow-lg z-50 py-2">
-                  <div className="px-3 py-1.5 text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                    Sort By
-                  </div>
-                  <button
-                    onClick={() => {
-                      setSortOption('NEWEST');
-                      setIsSortMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 text-[13px] hover:bg-zinc-50 transition-colors ${sortOption === 'NEWEST' ? 'font-semibold text-blue-600' : 'text-zinc-700'}`}
-                  >
-                    Newest First
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOption('OLDEST');
-                      setIsSortMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 text-[13px] hover:bg-zinc-50 transition-colors ${sortOption === 'OLDEST' ? 'font-semibold text-blue-600' : 'text-zinc-700'}`}
-                  >
-                    Oldest First (Loaded)
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSortOption('UNREAD_FIRST');
-                      setIsSortMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 text-[13px] hover:bg-zinc-50 transition-colors ${sortOption === 'UNREAD_FIRST' ? 'font-semibold text-blue-600' : 'text-zinc-700'}`}
-                  >
-                    Unread First
-                  </button>
-                </div>
-              )}
-
-              <button
-                onClick={() => mutate()}
-                className="p-2 rounded-full border border-zinc-200 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors shadow-sm"
-                title="Refresh Emails"
-              >
-                <RefreshCw className={`w-4 h-4 ${isValidating ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-
-            {/* Compose Button */}
-            <button
-              onClick={() => setIsComposeOpen(true)}
-              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-xl text-[14px] font-medium transition-colors shadow-sm ml-2"
-            >
-              <Edit className="w-4 h-4" />
-              Compose
-            </button>
-          </div>
-        </div>
-
-        {/* Category Tabs */}
-        <div className="flex items-center px-6 py-4 border-b border-zinc-100 shrink-0 overflow-x-auto no-scrollbar gap-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setView(tab.id);
-                setSelectedEmailId(null);
-              }}
-              className={`px-4 py-1.5 rounded-full text-[13px] font-semibold tracking-wide transition-all shrink-0 ${
-                view === tab.id
-                  ? 'bg-zinc-900 border border-zinc-900 text-white shadow-sm'
-                  : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
-              }`}
-            >
-              {tab.label}
-            </button>
+    <div className="zc-inbox-shell">
+      {/* Ambient background layers */}
+      <div className="zc-inbox-bg" aria-hidden="true">
+        <div className="zc-inbox-smoke zc-inbox-smoke-1" />
+        <div className="zc-inbox-smoke zc-inbox-smoke-2" />
+        <div className="zc-inbox-smoke zc-inbox-smoke-3" />
+        <div className="zc-inbox-fire-glow zc-inbox-fire-glow-1" />
+        <div className="zc-inbox-fire-glow zc-inbox-fire-glow-2" />
+        <div className="zc-inbox-vignette" />
+        <div className="zc-inbox-embers">
+          {Array.from({ length: 14 }).map((_, i) => (
+            <span key={i} className={`zc-inbox-ember zc-inbox-ember-${i % 7}`} />
           ))}
-        </div>
-
-        {/* Email List */}
-        <div className="flex-1 overflow-y-auto bg-white">
-          {isEmpty ? (
-            <div className="text-zinc-500 text-[14px] text-center mt-20">
-              No emails found in this view.
-            </div>
-          ) : (
-            displayEmails.map((email: any) => (
-              <div key={email.id} onClick={() => setSelectedEmailId(email.id)}>
-                <EmailItem email={email} isSelected={selectedEmailId === email.id} />
-              </div>
-            ))
-          )}
-
-          {/* Loading / End indicator */}
-          <div ref={ref} className="py-8 text-center">
-            {isLoadingMore ? (
-              <div className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
-            ) : isReachingEnd && !isEmpty ? (
-              <p className="text-[11px] text-zinc-400 font-medium">No more emails</p>
-            ) : null}
-          </div>
         </div>
       </div>
 
-      {/* Pane 3: Right Sidebar Toggle (Reading Pane OR Calendar) */}
+      {/* Pane 2: Email List (Main Content) */}
+      <main className="zc-inbox-main">
+        <div className="zc-inbox-panel">
+          <div className="zc-inbox-panel-glow" aria-hidden="true" />
+          <div className="zc-inbox-panel-inner">
+            {/* Header */}
+            <header className="zc-inbox-header">
+              <div className="zc-inbox-title-wrap">
+                <h1 className="zc-inbox-title">Inbox</h1>
+                <span className="zc-inbox-title-underline" aria-hidden="true" />
+              </div>
+
+              <div className="zc-inbox-header-controls">
+                {/* Search */}
+                <div className="zc-inbox-search">
+                  <Search className="zc-inbox-search-icon" size={15} />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search something..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="zc-inbox-search-input"
+                  />
+                  <span className="zc-inbox-search-kbd">
+                    <kbd>⌘</kbd>
+                    <kbd>K</kbd>
+                  </span>
+                </div>
+
+                {/* Filter / Sort */}
+                <div className="zc-inbox-sort-wrap">
+                  <button
+                    onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                    className={`zc-inbox-icon-btn ${isSortMenuOpen ? 'is-active' : ''}`}
+                    title="Sort"
+                  >
+                    <SlidersHorizontal size={15} />
+                  </button>
+                  {isSortMenuOpen && (
+                    <div className="zc-inbox-sort-menu">
+                      <div className="zc-inbox-sort-menu-label">Sort By</div>
+                      {(
+                        [
+                          ['NEWEST', 'Newest First'],
+                          ['OLDEST', 'Oldest First (Loaded)'],
+                          ['UNREAD_FIRST', 'Unread First'],
+                        ] as const
+                      ).map(([id, label]) => (
+                        <button
+                          key={id}
+                          onClick={() => {
+                            setSortOption(id);
+                            setIsSortMenuOpen(false);
+                          }}
+                          className={`zc-inbox-sort-item ${sortOption === id ? 'is-active' : ''}`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => mutate()}
+                  className="zc-inbox-icon-btn"
+                  title="Refresh Emails"
+                >
+                  <RefreshCw size={15} />
+                </button>
+
+                {/* Compose */}
+                <button onClick={() => setIsComposeOpen(true)} className="zc-inbox-compose">
+                  <span className="zc-inbox-compose-glow" aria-hidden="true" />
+                  <Flame size={15} className="zc-inbox-compose-icon" />
+                  <span>Compose</span>
+                </button>
+              </div>
+            </header>
+
+            {/* Tabs */}
+            <div className="zc-inbox-tabs">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setView(tab.id);
+                    setSelectedEmailId(null);
+                  }}
+                  className={`zc-inbox-tab ${view === tab.id ? 'is-active' : ''}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Email list */}
+            <div className="zc-inbox-list">
+              {isLoadingInitialData ? (
+                <div className="zc-inbox-loading">
+                  <span className="zc-inbox-loading-dot" />
+                  <span className="zc-inbox-loading-dot" />
+                  <span className="zc-inbox-loading-dot" />
+                </div>
+              ) : isEmpty ? (
+                <div className="zc-inbox-empty">
+                  <div className="zc-inbox-empty-ring" aria-hidden="true">
+                    <Flame size={26} />
+                  </div>
+                  <p className="zc-inbox-empty-title">Inbox is quiet</p>
+                  <p className="zc-inbox-empty-sub">No emails found in this view.</p>
+                </div>
+              ) : (
+                displayEmails.map((email: any) => (
+                  <div key={email.id} onClick={() => setSelectedEmailId(email.id)}>
+                    <EmailItem email={email} isSelected={selectedEmailId === email.id} />
+                  </div>
+                ))
+              )}
+
+              <div ref={ref} className="zc-inbox-end-sentinel">
+                {isLoadingMore && !isLoadingInitialData ? (
+                  <div className="zc-inbox-loading">
+                    <span className="zc-inbox-loading-dot" />
+                    <span className="zc-inbox-loading-dot" />
+                    <span className="zc-inbox-loading-dot" />
+                  </div>
+                ) : isReachingEnd && !isEmpty ? (
+                  <p className="zc-inbox-end-text">No more emails</p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Right pane */}
       {selectedEmailId && selectedEmail ? (
         <ReadingPane
           email={selectedEmail}
@@ -352,7 +360,6 @@ export default function InboxPage() {
         <CalendarSidebar />
       )}
 
-      {/* Modals */}
       {isComposeOpen && (
         <ComposeModal
           onClose={() => setIsComposeOpen(false)}
@@ -360,7 +367,6 @@ export default function InboxPage() {
           replyTo={replyTo}
         />
       )}
-
       {isShortcutOverlayOpen && <ShortcutOverlay onClose={() => setIsShortcutOverlayOpen(false)} />}
     </div>
   );

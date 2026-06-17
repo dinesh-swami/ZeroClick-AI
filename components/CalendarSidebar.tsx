@@ -3,12 +3,31 @@
 import React, { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
-import { Calendar, Video } from 'lucide-react';
+import { Calendar, CalendarPlus } from 'lucide-react';
 import { format, isToday, parseISO, startOfDay, endOfDay, differenceInMinutes } from 'date-fns';
-
+import '@/styles/calendarSidebar.css';
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+interface CalendarSidebarProps {
+  isLoading?: boolean;
+  showCurrentTime?: boolean;
+  currentTime: Date;
+  currentTimeDiff: number;
+  pixelPerMinute: number;
+  hours: number[];
+  displayEvents: any[];
+  getEventStyle: (event: any) => React.CSSProperties;
+  getThemeColors: (colorId?: string) => string;
+}
+
 export default function CalendarSidebar() {
+  // for formate ui
+  const formatHour = (hour: number) => {
+    if (hour === 0) return '12 AM';
+    if (hour === 12) return '12 PM';
+    return hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
+  };
+
   // Fetch today's events
   const todayStart = startOfDay(new Date()).toISOString();
   const todayEnd = endOfDay(new Date()).toISOString();
@@ -75,54 +94,77 @@ export default function CalendarSidebar() {
   const showCurrentTime = currentTimeDiff >= 0 && currentTimeDiff <= 24 * 60;
 
   return (
-    <div className="w-[320px] bg-white border-l border-zinc-200 flex flex-col h-full shrink-0">
-      <div className="h-[72px] flex items-center px-6 border-b border-zinc-200 shrink-0">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-zinc-900" />
-          <h2 className="text-[14px] font-semibold text-zinc-900">Today's Calendar</h2>
-        </div>
+    <aside className="zc-cal">
+      {/* Ambient background layers */}
+      <div className="zc-cal-bg" aria-hidden="true">
+        <div className="zc-cal-smoke zc-cal-smoke-1" />
+        <div className="zc-cal-smoke zc-cal-smoke-2" />
+        <div className="zc-cal-fire-glow zc-cal-fire-top" />
+        <div className="zc-cal-fire-glow zc-cal-fire-bottom" />
+        <div className="zc-cal-ember zc-cal-ember-1" />
+        <div className="zc-cal-ember zc-cal-ember-2" />
+        <div className="zc-cal-ember zc-cal-ember-3" />
+        <div className="zc-cal-ember zc-cal-ember-4" />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-6 relative">
-        {isLoading && <div className="text-sm text-zinc-500 text-center">Loading events...</div>}
+      {/* Header */}
+      <header className="zc-cal-header">
+        <div className="zc-cal-header-inner">
+          <div className="zc-cal-header-icon">
+            <Calendar className="zc-cal-header-icon-svg" />
+            <span className="zc-cal-header-icon-glow" />
+          </div>
+          <h2 className="zc-cal-header-title">Today's Calendar</h2>
+          <span className="zc-cal-status" title="Live">
+            <span className="zc-cal-status-dot" />
+            <span className="zc-cal-status-ring" />
+          </span>
+        </div>
+        <div className="zc-cal-header-date">{format(currentTime, 'd MMM')}</div>
+      </header>
+
+      {/* Timeline */}
+      <div className="zc-cal-scroll">
+        {isLoading && (
+          <div className="zc-cal-loading">
+            <span className="zc-cal-loading-dot" />
+            <span className="zc-cal-loading-dot" />
+            <span className="zc-cal-loading-dot" />
+            <p>Loading events…</p>
+          </div>
+        )}
 
         {!isLoading && (
-          <div className="relative">
-            {/* Timeline grid */}
-            {hours.map((hour, i) => (
-              <div key={hour} className="flex relative h-[80px]">
-                <div className="w-12 text-[11px] font-medium text-zinc-400 -mt-2">
-                  {hour === 0
-                    ? '12 AM'
-                    : hour > 12
-                      ? `${hour - 12} PM`
-                      : hour === 12
-                        ? '12 PM'
-                        : `${hour} AM`}
-                </div>
-                <div className="flex-1 border-t border-zinc-100 relative"></div>
+          <div className="zc-cal-timeline">
+            {/* Hour rows */}
+            {hours.map((hour) => (
+              <div key={hour} className="zc-cal-hour-row">
+                <div className="zc-cal-hour-label">{formatHour(hour)}</div>
+                <div className="zc-cal-hour-line" />
               </div>
             ))}
 
-            {/* Current Time Line */}
+            {/* Current time indicator */}
             {showCurrentTime && (
               <div
-                className="absolute left-0 right-0 flex items-center z-20 pointer-events-none"
+                className="zc-cal-now"
                 style={{
                   top: `${currentTimeDiff * pixelPerMinute}px`,
-                  transform: 'translateY(-50%)',
                 }}
               >
-                <div className="w-10 bg-blue-600 text-white text-[10px] font-bold py-0.5 rounded-full text-center shadow-sm">
-                  {format(currentTime, 'h.mm')}
+                <div className="zc-cal-now-pill">
+                  <span className="zc-cal-now-pill-glow" />
+                  <span className="zc-cal-now-pill-text">{format(currentTime, 'h.mm')}</span>
                 </div>
-                <div className="flex-1 h-[2px] bg-blue-600"></div>
+                <div className="zc-cal-now-line">
+                  <span className="zc-cal-now-line-glow" />
+                </div>
               </div>
             )}
 
-            {/* Event Cards */}
-            <div className="absolute top-0 left-12 right-0 bottom-0 pointer-events-none">
-              {displayEvents.map((event: any, idx: number) => {
+            {/* Event chips */}
+            <div className="zc-cal-events">
+              {displayEvents.map((event: any) => {
                 const style = getEventStyle(event);
                 const colorClass = getThemeColors(event.colorId);
 
@@ -130,40 +172,42 @@ export default function CalendarSidebar() {
                   <div
                     key={event.id}
                     onClick={() => router.push(`/calendar?editEventId=${event.id}`)}
-                    className={`absolute left-0 right-0 rounded-2xl border-l-[3px] shadow-sm p-3 pointer-events-auto transition-transform hover:scale-[1.02] cursor-pointer ${colorClass}`}
+                    className={`zc-cal-event ${colorClass}`}
                     style={style}
                   >
-                    <h3 className="text-[13px] font-semibold text-zinc-900 mb-1 line-clamp-2 leading-tight">
-                      {event.title || event.summary || 'Untitled Event'}
-                    </h3>
-                    {event.description && (
-                      <p className="text-[11px] text-zinc-500 line-clamp-1 mb-1.5">
-                        {event.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between mt-auto absolute bottom-3 left-3 right-3">
-                      <p className="text-[11px] text-zinc-500 font-medium">
-                        {format(
-                          new Date(event.start?.dateTime || event.start?.date || event.start),
-                          'h:mm a'
-                        )}{' '}
-                        -{' '}
-                        {format(
-                          new Date(event.end?.dateTime || event.end?.date || event.end),
-                          'h:mm a'
-                        )}
-                      </p>
-                      {event.hangoutLink && (
-                        <a
-                          href={event.hangoutLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1 bg-white border border-zinc-200 shadow-sm rounded-full px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors"
-                        >
-                          Join
-                        </a>
+                    <span className="zc-cal-event-glow" />
+                    <div className="zc-cal-event-bar" />
+                    <div className="zc-cal-event-body">
+                      <h3 className="zc-cal-event-title">
+                        {event.title || event.summary || 'Untitled Event'}
+                      </h3>
+                      {event.description && (
+                        <p className="zc-cal-event-desc">{event.description}</p>
                       )}
+                      <div className="zc-cal-event-foot">
+                        <p className="zc-cal-event-time">
+                          {format(
+                            new Date(event.start?.dateTime || event.start?.date || event.start),
+                            'h:mm a'
+                          )}{' '}
+                          –{' '}
+                          {format(
+                            new Date(event.end?.dateTime || event.end?.date || event.end),
+                            'h:mm a'
+                          )}
+                        </p>
+                        {event.hangoutLink && (
+                          <a
+                            href={event.hangoutLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="zc-cal-event-join"
+                          >
+                            Join
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -172,6 +216,18 @@ export default function CalendarSidebar() {
           </div>
         )}
       </div>
-    </div>
+
+      {/* Floating action button */}
+      <button
+        type="button"
+        onClick={() => router.push('/calendar')}
+        className="zc-cal-fab"
+        aria-label="Open calendar"
+      >
+        <span className="zc-cal-fab-ring" />
+        <span className="zc-cal-fab-glow" />
+        <CalendarPlus className="zc-cal-fab-icon" />
+      </button>
+    </aside>
   );
 }

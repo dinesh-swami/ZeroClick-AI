@@ -1,6 +1,7 @@
 import { format, isToday } from 'date-fns';
-import { Calendar, Sparkles, Check, CheckSquare } from 'lucide-react';
+import { Calendar, Sparkles, Check, Star } from 'lucide-react';
 import React, { useState } from 'react';
+import '@/styles/EmailItem.css';
 
 interface Email {
   id: string;
@@ -36,10 +37,10 @@ export default function EmailItem({ email, isSelected }: { email: Email; isSelec
   // Fake logo assignment for UI showcase based on sender name length
   const getAvatarStyle = () => {
     const len = senderName.length;
-    if (len % 4 === 0) return { bg: 'bg-red-600', text: 'text-white' };
-    if (len % 4 === 1) return { bg: 'bg-blue-600', text: 'text-white' };
-    if (len % 4 === 2) return { bg: 'bg-green-200', text: 'text-green-700' };
-    return { bg: 'bg-zinc-800', text: 'text-white' };
+    if (len % 4 === 0) return { bg: 'zc-avatar-red', text: '' };
+    if (len % 4 === 1) return { bg: 'zc-avatar-amber', text: '' };
+    if (len % 4 === 2) return { bg: 'zc-avatar-green', text: '' };
+    return { bg: 'zc-avatar-coal', text: '' };
   };
   const avatarStyle = getAvatarStyle();
 
@@ -67,72 +68,70 @@ export default function EmailItem({ email, isSelected }: { email: Email; isSelec
 
   return (
     <div
-      className={`px-5 py-4 cursor-pointer transition-colors border-b border-zinc-100 flex gap-4 ${
-        isSelected ? 'bg-zinc-50/80' : 'hover:bg-zinc-50'
+      className={`zc-email ${isSelected ? 'is-selected' : ''} ${
+        email.isRead ? 'is-read' : 'is-unread'
       }`}
     >
-      {/* Checkbox (mock) */}
-      <div className="mt-1 flex-shrink-0">
-        <div className="w-4 h-4 rounded-md border border-zinc-300 flex items-center justify-center hover:border-zinc-400 transition-colors"></div>
+      {/* Ambient fire reflection */}
+      <span className="zc-email-glow" aria-hidden="true" />
+      <span className="zc-email-bar" aria-hidden="true" />
+
+      {/* Checkbox */}
+      <div className="zc-email-check-wrap">
+        <div
+          className="zc-email-check"
+          onClick={(e) => e.stopPropagation()}
+          role="checkbox"
+          aria-checked={!!isSelected}
+        >
+          {isSelected && <Check className="zc-email-check-icon" />}
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start mb-0.5">
-          <div className="flex items-center gap-2">
-            <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 shadow-sm ${avatarStyle.bg} ${avatarStyle.text}`}
-            >
-              {initials}
+      <div className="zc-email-main">
+        {/* Top row: avatar + sender + time */}
+        <div className="zc-email-top">
+          <div className="zc-email-sender">
+            <div className={`zc-email-avatar ${avatarStyle.bg}`}>
+              <span className="zc-email-avatar-glow" />
+              <span className="zc-email-avatar-text">{initials}</span>
             </div>
-            <span
-              className={`text-[15px] truncate flex items-center gap-2 ${
-                email.isRead ? 'text-zinc-600 font-medium' : 'text-zinc-900 font-bold'
-              }`}
-            >
+            <span className="zc-email-name">
               {senderName}
-              {!email.isRead && <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>}
+              {!email.isRead && <span className="zc-email-unread-dot" />}
             </span>
           </div>
-          <span className="text-[12px] text-zinc-500 font-medium shrink-0 pt-0.5">
-            {timeString}
-          </span>
+          <span className="zc-email-time">{timeString}</span>
         </div>
 
-        <p
-          className={`text-[14px] truncate mb-1 pl-9 ${
-            email.isRead ? 'text-zinc-600' : 'text-zinc-900 font-semibold'
-          }`}
-        >
-          {email.subject}
-        </p>
+        {/* Subject */}
+        <p className="zc-email-subject">{email.subject}</p>
 
-        <p className="text-[13px] text-zinc-500 line-clamp-2 leading-relaxed pl-9 mb-3">
-          {previewText}
-        </p>
+        {/* Preview */}
+        <p className="zc-email-preview">{previewText}</p>
 
+        {/* AI Summary card */}
         {hasActionCard && isSummaryVisible && (
-          <div className="pl-9 pr-4 mb-3">
-            <div className="bg-[#F3F4F9] border border-[#E5E7EB]/50 rounded-xl p-3 shadow-sm">
-              <div className="flex items-start gap-2">
-                <Sparkles className="w-4 h-4 text-blue-600 mt-0.5 shrink-0" />
-                <p className="text-[13px] text-blue-900/80 font-medium leading-relaxed">
-                  {mockSummary}
-                </p>
-              </div>
+          <div className="zc-email-summary-wrap">
+            <div className="zc-email-summary">
+              <span className="zc-email-summary-glow" />
+              <Sparkles className="zc-email-summary-icon" />
+              <p className="zc-email-summary-text">{mockSummary}</p>
             </div>
           </div>
         )}
 
+        {/* Action buttons */}
         {hasActionCard && (
-          <div className="pl-9 flex items-center gap-2 mt-2">
+          <div className="zc-email-actions">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setIsSummaryVisible(!isSummaryVisible);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 text-[12px] font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm bg-white"
+              className="zc-email-btn"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="zc-email-btn-icon" />
               {isSummaryVisible ? 'Hide Summary' : 'View Summary'}
             </button>
 
@@ -140,18 +139,28 @@ export default function EmailItem({ email, isSelected }: { email: Email; isSelec
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors shadow-sm ${
-                isAdded
-                  ? 'bg-blue-50 border border-blue-100 text-blue-600'
-                  : 'bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50'
-              }`}
+              className={`zc-email-btn ${isAdded ? 'is-added' : ''}`}
             >
-              {isAdded ? <Check className="w-3.5 h-3.5" /> : <Calendar className="w-3.5 h-3.5" />}
+              {isAdded ? (
+                <Check className="zc-email-btn-icon" />
+              ) : (
+                <Calendar className="zc-email-btn-icon" />
+              )}
               {actionButton}
             </button>
           </div>
         )}
       </div>
+
+      {/* Star button */}
+      <button
+        type="button"
+        className="zc-email-star"
+        onClick={(e) => e.stopPropagation()}
+        aria-label="Star email"
+      >
+        <Star className="zc-email-star-icon" />
+      </button>
     </div>
   );
 }

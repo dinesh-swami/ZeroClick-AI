@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { DisconnectButton } from '@/components/DisconnectButton';
 import { Settings, Mail, Calendar as CalendarIcon, CheckCircle2 } from 'lucide-react';
+import '@/styles/setting.css';
 
 export default async function SettingsPage() {
   const refreshToken = await getRefreshTokenCookie();
@@ -18,57 +19,63 @@ export default async function SettingsPage() {
   if (!user) redirect('/login');
 
   return (
-    <div className="flex-1 bg-[#F9FAFB] h-full overflow-y-auto font-sans">
-      <div className="max-w-4xl mx-auto px-6 py-10 lg:px-12 lg:py-16 space-y-10">
+    <div className="settings-shell">
+      {/* Ambient Fire + Smoke layers */}
+      <div className="settings-glow" aria-hidden="true" />
+      <div className="settings-smoke" aria-hidden="true" />
+      <div className="settings-embers" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+
+      <div className="settings-container">
         {/* Header */}
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Settings className="w-8 h-8 text-zinc-900" />
-            <h1 className="text-4xl lg:text-3xl font-bold text-zinc-900 tracking-tight">
-              Settings
-            </h1>
+        <header className="settings-header">
+          <div className="settings-header-title">
+            <Settings className="settings-header-icon" />
+            <h1>Settings</h1>
           </div>
-          <p className="text-zinc-500 text-lg">Manage your connected accounts and preferences.</p>
-        </div>
+          <p>Manage your connected accounts and preferences.</p>
+        </header>
 
         {/* Integrations Section */}
-        <section className="bg-white border border-zinc-200 rounded-[32px] p-8 lg:p-10 shadow-sm">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-zinc-900 tracking-tight mb-2">Integrations</h2>
-            <p className="text-zinc-500 text-[15px]">
-              Connect your external accounts to sync data seamlessly via Corsair.
-            </p>
+        <section className="settings-panel">
+          <div className="settings-panel-header">
+            <h2>Integrations</h2>
+            <p>Connect your external accounts to sync data seamlessly via Corsair.</p>
           </div>
 
-          <div className="space-y-6">
+          <div className="integration-list">
             {/* Gmail Integration */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-zinc-100 bg-zinc-50 hover:bg-white transition-colors">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#FFE2D1] border border-[#FFCFAE] flex items-center justify-center shrink-0">
-                  <Mail className="w-6 h-6 text-[#85451C]" />
+            <div className="integration-card">
+              <div className="integration-left">
+                <div className="integration-icon fire">
+                  <Mail />
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-3">
-                    Gmail
+                <div className="integration-info">
+                  <div className="integration-title-row">
+                    <span className="integration-title">Gmail</span>
                     {user.gmailConnected && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider bg-[#BCF0C8] text-[#1A5C2B] px-3 py-1 rounded-full border border-[#A3E8B3]">
-                        <CheckCircle2 className="w-3 h-3" /> Connected
+                      <span className="connected-badge">
+                        <CheckCircle2 /> Connected
                       </span>
                     )}
-                  </h3>
-                  <p className="text-sm text-zinc-500 mt-1">
+                  </div>
+                  <p className="integration-desc">
                     Sync your inbox and manage your emails securely.
                   </p>
                 </div>
               </div>
-              <div className="shrink-0 mt-4 sm:mt-0">
+
+              <div>
                 {user.gmailConnected ? (
-                  <DisconnectButton integration="gmail" label="Gmail" />
+                  <DisconnectButton integration="gmail" label="Disconnect Gmail" />
                 ) : (
-                  <a
-                    href="/api/auth/connect/gmail"
-                    className="inline-flex items-center justify-center px-6 py-2.5 bg-zinc-900 text-white text-[15px] font-semibold rounded-full hover:bg-zinc-800 transition-colors shadow-sm"
-                  >
+                  <a href="/api/auth/connect/gmail" className="btn-fire">
                     Connect
                   </a>
                 )}
@@ -76,33 +83,31 @@ export default async function SettingsPage() {
             </div>
 
             {/* Google Calendar Integration */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-zinc-100 bg-zinc-50 hover:bg-white transition-colors">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#CBE4FF] border border-[#B4D7FF] flex items-center justify-center shrink-0">
-                  <CalendarIcon className="w-6 h-6 text-[#1E4C82]" />
+            <div className="integration-card">
+              <div className="integration-left">
+                <div className="integration-icon calendar">
+                  <CalendarIcon />
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-zinc-900 flex items-center gap-3">
-                    Google Calendar
+                <div className="integration-info">
+                  <div className="integration-title-row">
+                    <span className="integration-title">Google Calendar</span>
                     {user.calendarConnected && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider bg-[#BCF0C8] text-[#1A5C2B] px-3 py-1 rounded-full border border-[#A3E8B3]">
-                        <CheckCircle2 className="w-3 h-3" /> Connected
+                      <span className="connected-badge">
+                        <CheckCircle2 /> Connected
                       </span>
                     )}
-                  </h3>
-                  <p className="text-sm text-zinc-500 mt-1">
+                  </div>
+                  <p className="integration-desc">
                     See your schedule alongside your emails and plan ahead.
                   </p>
                 </div>
               </div>
-              <div className="shrink-0 mt-4 sm:mt-0">
+
+              <div>
                 {user.calendarConnected ? (
-                  <DisconnectButton integration="calendar" label="Calendar" />
+                  <DisconnectButton integration="calendar" label="Disconnect Calendar" />
                 ) : (
-                  <a
-                    href="/api/auth/connect/calendar"
-                    className="inline-flex items-center justify-center px-6 py-2.5 bg-zinc-900 text-white text-[15px] font-semibold rounded-full hover:bg-zinc-800 transition-colors shadow-sm"
-                  >
+                  <a href="/api/auth/connect/calendar" className="btn-fire">
                     Connect
                   </a>
                 )}

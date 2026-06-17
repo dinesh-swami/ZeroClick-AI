@@ -13,9 +13,9 @@ export function AgentDockWrapper() {
   if (pathname === '/agent') return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end ">
       {isOpen ? (
-        <div className="animate-in slide-in-from-bottom-5 fade-in duration-200">
+        <div className="animate-in slide-in-from-bottom-5 fade-in duration-200 ">
           <AgentChatUI isDocked={true} onClose={() => setIsOpen(false)} />
         </div>
       ) : (

@@ -3,7 +3,7 @@ import { getRefreshTokenCookie, verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { Mail, Calendar, CheckCircle2 } from 'lucide-react';
-
+import '@/styles/onbording.css';
 export default async function OnboardingPage() {
   const refreshToken = await getRefreshTokenCookie();
   if (!refreshToken) redirect('/login');
@@ -19,101 +19,114 @@ export default async function OnboardingPage() {
   // if (!user.emailVerifiedAt) redirect('/verify-email');
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] flex flex-col items-center justify-center p-4 font-sans">
-      <div className="max-w-4xl w-full space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-semibold tracking-tight text-zinc-900">
-            Connect your accounts
-          </h1>
-          <p className="text-zinc-500 text-lg">
-            Meridian needs to connect to your providers to sync your data.
-          </p>
+    <div className="onboarding-page">
+      {/* Background layers */}
+      <div className="onboarding-bg">
+        <div className="smoke smoke-1" />
+        <div className="smoke smoke-2" />
+        <div className="smoke smoke-3" />
+        <div className="fire-glow fire-glow-1" />
+        <div className="fire-glow fire-glow-2" />
+        <div className="embers">
+          {Array.from({ length: 18 }).map((_, i) => (
+            <span
+              key={i}
+              className={`ember ember-${i % 6}`}
+              style={{ left: `${(i * 5.5) % 100}%`, animationDelay: `${(i * 0.7) % 9}s` }}
+            />
+          ))}
         </div>
+        <div className="vignette" />
+      </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mt-12">
-          {/* Gmail Card */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-8 flex flex-col items-center text-center space-y-6 relative overflow-hidden transition-all hover:border-zinc-300 shadow-sm">
-            <div className="h-16 w-16 bg-red-50 rounded-full flex items-center justify-center text-red-500 mb-2 border border-red-100">
-              <Mail className="h-8 w-8" />
-            </div>
-            <div className="space-y-2 flex-1">
-              <h3 className="text-xl font-medium text-zinc-900">Connect Gmail</h3>
-              <p className="text-zinc-500 text-sm leading-relaxed">
-                Meridian needs access to read, send, and manage your emails
-              </p>
-            </div>
-
-            <div className="w-full pt-4">
-              {user.gmailConnected ? (
-                <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50 py-3 rounded-xl border border-green-200">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-medium">Connected</span>
-                </div>
-              ) : (
-                <a
-                  href="/api/auth/connect/gmail"
-                  className="block w-full bg-zinc-900 text-white font-medium py-3 rounded-xl hover:bg-zinc-800 transition-colors shadow-sm"
-                >
-                  Connect Gmail
-                </a>
-              )}
-            </div>
+      <div className="onboarding-shell">
+        <header className="onboarding-header">
+          <div className="flame-badge">
+            <span className="flame-core" />
+            <span className="flame-icon">🔥</span>
           </div>
+          <h1 className="onboarding-title">Connect your accounts</h1>
+          <p className="onboarding-subtitle">
+            ZeroClick needs to connect to your providers to sync your data.
+          </p>
+        </header>
 
+        <section className="onboarding-content">
           {/* Calendar Card */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-8 flex flex-col items-center text-center space-y-6 relative overflow-hidden transition-all hover:border-zinc-300 shadow-sm">
-            <div className="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mb-2 border border-blue-100">
+          <article className="onboarding-card">
+            <div className="card-glow card-glow-calendar" />
+            <div className="card-icon card-icon-calendar">
               <Calendar className="h-8 w-8" />
             </div>
-            <div className="space-y-2 flex-1">
-              <h3 className="text-xl font-medium text-zinc-900">Connect Calendar</h3>
-              <p className="text-zinc-500 text-sm leading-relaxed">
-                See your schedule alongside your emails
-              </p>
+            <div className="card-body">
+              <h3 className="card-title">Connect Calendar</h3>
+              <p className="card-description">See your schedule alongside your emails</p>
             </div>
 
-            <div className="w-full pt-4 space-y-3">
+            <div className="card-action">
               {user.calendarConnected ? (
-                <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50 py-3 rounded-xl border border-green-200">
+                <div className="connected-pill">
                   <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-medium">Connected</span>
+                  <span>Connected</span>
                 </div>
               ) : (
                 <>
-                  <a
-                    href="/api/auth/connect/calendar"
-                    className="block w-full bg-blue-600 text-white font-medium py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
-                  >
-                    Connect Calendar <span className="opacity-70 font-normal ml-1">(Optional)</span>
+                  <a href="/api/auth/connect/calendar" className="secondary-btn">
+                    <span>Connect Calendar</span>
+                    <span className="optional-tag">Optional</span>
                   </a>
-                  <button className="text-zinc-500 text-sm hover:text-zinc-700 transition-colors mt-2 block w-full text-center">
-                    Skip for now
-                  </button>
+                  <button className="skip-btn">Skip for now</button>
                 </>
               )}
             </div>
-          </div>
-        </div>
+          </article>
+          {/* Gmail Card */}
+          <article className="onboarding-card">
+            <div className="card-glow card-glow-gmail" />
+            <div className="card-icon card-icon-gmail">
+              <Mail className="h-8 w-8" />
+            </div>
+            <div className="card-body">
+              <h3 className="card-title">Connect Gmail</h3>
+              <p className="card-description">
+                ZeroClick needs access to read, send, and manage your emails
+              </p>
+            </div>
 
-        <div className="flex justify-center mt-12 pt-8">
+            <div className="card-action">
+              {user.gmailConnected ? (
+                <div className="connected-pill">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <span>Connected</span>
+                </div>
+              ) : (
+                <a href="/api/auth/connect/gmail" className="fire-btn">
+                  <span className="fire-btn-glow" />
+                  <span className="fire-btn-label">Connect Gmail</span>
+                </a>
+              )}
+            </div>
+          </article>
+        </section>
+
+        <footer className="onboarding-footer">
           {user.gmailConnected ? (
-            <Link
-              href="/inbox"
-              className="bg-zinc-900 text-white px-8 py-4 rounded-xl font-medium text-lg hover:bg-zinc-800 transition-all shadow-md hover:shadow-lg flex items-center space-x-2"
-            >
-              <span>Continue to Meridian</span>
-              <span className="text-xl leading-none">→</span>
+            <Link href="/inbox" className="fire-btn fire-btn-lg">
+              <span className="fire-btn-glow" />
+              <span className="fire-btn-label">
+                Continue to ZeroClick
+                <span className="arrow">→</span>
+              </span>
             </Link>
           ) : (
-            <button
-              disabled
-              className="bg-zinc-100 text-zinc-400 px-8 py-4 rounded-xl font-medium text-lg cursor-not-allowed flex items-center space-x-2 border border-zinc-200"
-            >
-              <span>Continue to Meridian</span>
-              <span className="text-xl leading-none">→</span>
+            <button disabled className="fire-btn fire-btn-lg fire-btn-disabled">
+              <span className="fire-btn-label">
+                Continue to ZeroClick
+                <span className="arrow">→</span>
+              </span>
             </button>
           )}
-        </div>
+        </footer>
       </div>
     </div>
   );

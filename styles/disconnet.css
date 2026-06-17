@@ -1,0 +1,139 @@
+.disconnect-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 190px;
+  padding: 12px 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 94, 0, 0.35);
+  background: rgba(12, 6, 4, 0.95);
+  color: #ff6b1a;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.35s ease;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    inset 0 0 20px rgba(255, 90, 0, 0.08),
+    0 0 20px rgba(255, 80, 0, 0.12);
+}
+
+.disconnect-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(255, 115, 0, 0.15), transparent);
+  transform: translateX(-100%);
+  animation: fireSweep 4s linear infinite;
+}
+
+.disconnect-btn::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 120, 0, 0.4), rgba(255, 60, 0, 0.1));
+  z-index: -1;
+  opacity: 0.7;
+  filter: blur(10px);
+}
+
+.disconnect-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 120, 0, 0.7);
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255, 70, 0, 0.15), rgba(255, 120, 0, 0.08));
+  box-shadow:
+    0 0 12px rgba(255, 90, 0, 0.4),
+    0 0 30px rgba(255, 70, 0, 0.25),
+    inset 0 0 25px rgba(255, 90, 0, 0.15);
+}
+
+.disconnect-btn:active {
+  transform: scale(0.97);
+}
+
+.disconnect-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.disconnect-btn__text {
+  position: relative;
+  z-index: 2;
+}
+
+.disconnect-btn__smoke {
+  position: absolute;
+  bottom: -8px;
+  left: 15%;
+  width: 60px;
+  height: 60px;
+  pointer-events: none;
+  opacity: 0.22;
+  filter: blur(12px);
+  background: radial-gradient(circle, rgba(255, 90, 0, 0.9) 0%, transparent 70%);
+  animation: smokeFloat 5s ease-in-out infinite;
+}
+
+.disconnect-btn__ember {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ff7a1a;
+  box-shadow: 0 0 10px #ff7a1a;
+}
+
+.disconnect-btn__ember:nth-child(3) {
+  left: 20%;
+  bottom: 8px;
+  animation: emberFly 3s linear infinite;
+}
+
+.disconnect-btn__ember:nth-child(4) {
+  left: 50%;
+  bottom: 6px;
+  animation: emberFly 4s linear infinite 1s;
+}
+
+.disconnect-btn__ember:nth-child(5) {
+  left: 75%;
+  bottom: 10px;
+  animation: emberFly 3.5s linear infinite 0.5s;
+}
+
+@keyframes fireSweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes smokeFloat {
+  0% {
+    transform: translateY(10px) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-15px) scale(1.2);
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateY(-30px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes emberFly {
+  0% {
+    transform: translateY(0) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) translateX(10px) scale(0);
+    opacity: 0;
+  }
+}

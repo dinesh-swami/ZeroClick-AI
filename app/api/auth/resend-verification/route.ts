@@ -37,7 +37,6 @@ export async function POST(req: Request) {
     // Generate new Verification Token
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-  
 
     await prisma.verificationToken.create({
       data: {
@@ -46,7 +45,7 @@ export async function POST(req: Request) {
         expiresAt,
       },
     });
-  
+
     // Send Email via Resend
     const verifyLink = `${appUrl}/api/auth/verify?token=${token}`;
 
@@ -95,7 +94,7 @@ export async function POST(req: Request) {
     </div>
   `,
     });
-   
+
     return NextResponse.json(
       {
         message: 'Verification link resent.',

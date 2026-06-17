@@ -1,7 +1,8 @@
 'use client';
-
 import { useState, useRef, useEffect } from 'react';
 import { useChat as useChatOriginal } from '@ai-sdk/react';
+import '@/styles/agent.css';
+
 const useChat = useChatOriginal as any;
 import {
   Bot,
@@ -13,10 +14,21 @@ import {
   Mic,
   ChevronDown,
   ChevronRight,
+  Sparkles,
+  Mail,
+  Calendar,
+  Search,
+  PenLine,
 } from 'lucide-react';
 import { Waveform } from '@/components/Waveform';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 
+const SUGGESTIONS = [
+  { icon: Mail, label: 'Summarize my inbox' },
+  { icon: Calendar, label: 'Schedule my day' },
+  { icon: Search, label: 'Find urgent emails' },
+  { icon: PenLine, label: 'Draft a reply' },
+];
 export function AgentChatUI({
   onClose,
   isDocked = false,
@@ -31,240 +43,221 @@ export function AgentChatUI({
     transcript,
     setTranscript,
   } = useVoiceInput();
-  const inputRef = useRef<HTMLInputElement>(null);
-
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState('');
   const [baseInput, setBaseInput] = useState('');
-
   const { messages, sendMessage, status } = useChat({
     api: '/api/chat',
     initialMessages: [],
   });
-
   const isLoading = status === 'submitted' || status === 'streaming' || status === 'generating';
-
   useEffect(() => {
     if (voiceState === 'listening') {
       setBaseInput(input);
     }
   }, [voiceState]);
-
   useEffect(() => {
     if (voiceState === 'listening' && transcript) {
       setInput((baseInput + ' ' + transcript).trim());
     }
   }, [transcript, voiceState, baseInput]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   };
-
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!input || !input.trim()) return;
     sendMessage({ text: input });
-
     setInput('');
     setBaseInput('');
     setTranscript('');
     stopListening();
   };
-
-  // Keyboard shortcuts (ctrl+v/k) were intentionally removed per user request to avoid conflicts.
-
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
   return (
-    <div
-      className={`flex flex-col bg-white overflow-hidden font-sans ${isDocked ? 'h-[600px] w-[500px] rounded-t-3xl sm:rounded-3xl shadow-2xl border border-zinc-200/60' : 'h-full w-full'}`}
-    >
+    <div className="agent-root">
+      {/* Ambient layers */}
+      <div className="agent-glow" />
+      <div className="agent-smoke" />
+      <div className="agent-embers" />
       {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-zinc-100 bg-white shrink-0">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-2xl bg-[#CBE4FF] flex items-center justify-center shrink-0">
-            <Bot className="w-5 h-5 text-[#1E4C82]" />
+      <header className="agent-header">
+        <div className="agent-header-left">
+          <div className="agent-avatar">
+            <Bot size={22} strokeWidth={2.2} />
           </div>
-          <div>
-            <h2 className="text-[16px] font-bold text-zinc-900 leading-tight">Corsair Agent</h2>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-[11px] font-bold tracking-widest text-emerald-600 uppercase">
-                Online
-              </span>
-            </div>
+          <div className="agent-title">
+            <span className="agent-name">Corsair Agent</span>
+            <span className="agent-status">
+              <span className="agent-status-dot" />
+              Online
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="agent-header-actions">
           {!isDocked && (
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 text-[11px] font-bold tracking-widest text-zinc-600 uppercase transition-colors">
-              <Maximize2 className="w-3 h-3" /> Expand
+            <button className="agent-icon-btn" type="button">
+              <Maximize2 size={14} />
+              Expand
             </button>
           )}
-          {isDocked && (
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 transition-colors"
-            >
-              <X className="w-5 h-5" />
+          {isDocked && onClose && (
+            <button className="agent-icon-btn" type="button" onClick={onClose}>
+              <X size={16} />
             </button>
           )}
         </div>
-      </div>
-
+      </header>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#F9FAFB]">
+      <div className="agent-messages">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-zinc-400 space-y-4">
-            <Bot className="w-12 h-12 text-zinc-200" />
-            <p className="text-sm font-medium">How can I help you today?</p>
-          </div>
-        )}
-
-        {messages.map((m: any) => (
-          <div key={m.id} className="flex gap-4 max-w-full">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${m.role === 'user' ? 'bg-zinc-200' : 'bg-[#CBE4FF]'}`}
-            >
-              {m.role === 'user' ? (
-                <User className="w-4 h-4 text-zinc-600" />
-              ) : (
-                <Bot className="w-4 h-4 text-[#1E4C82]" />
-              )}
+          <div className="agent-empty">
+            <div className="agent-empty-icon">
+              <Sparkles size={36} strokeWidth={2.2} />
             </div>
-            <div className="flex-1 min-w-0 space-y-2">
-              <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                {m.role === 'user' ? 'You' : 'Agent'}
-              </div>
-
-              {/* New improved rendering */}
-              <div
-                className={`rounded-2xl p-4 text-[14px] leading-relaxed break-words shadow-sm ${m.role === 'user' ? 'bg-white border border-zinc-200 text-zinc-900' : 'bg-[#CBE4FF] border border-[#B4D7FF] text-[#1E4C82]'}`}
-              >
-                {m.content ? (
-                  <div>{m.content}</div>
-                ) : m.parts ? (
-                  m.parts.map((part: any, i: number) => {
-                    console.log('PART:', part); // ye line add karo
-                    if (part.type === 'text' && part.text) {
-                      return <div key={i}>{part.text}</div>;
-                    }
-                    // Agar tool calls etc. hain to ignore for now (tumhara ActionLog already handle kar raha hai)
-                    return null;
-                  })
-                ) : (
-                  <div className="text-zinc-400 italic">No content</div>
-                )}
-              </div>
-
-              {/* Action Log (existing) */}
-              {(() => {
-                const tools =
-                  m.toolInvocations ||
-                  (m.parts
-                    ? m.parts.filter(
-                        (p: any) =>
-                          p.type === 'tool-invocation' ||
-                          p.type === 'tool' ||
-                          p.type === 'dynamic-tool'
-                      )
-                    : []);
-                return tools.length > 0 ? <ActionLog toolInvocations={tools} /> : null;
-              })()}
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex gap-4">
-            <div className="w-8 h-8 rounded-full bg-[#CBE4FF] flex items-center justify-center shrink-0">
-              <Bot className="w-4 h-4 text-[#1E4C82]" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 pt-2">
-                <div className="flex items-end gap-1 h-3">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="w-1 bg-[#1E4C82] rounded-full h-full animate-pulse"
-                      style={{ animationDelay: `${i * 150}ms` }}
-                    />
-                  ))}
+            <h2 className="agent-empty-title">ZeroClick AI Command Center</h2>
+            <p className="agent-empty-sub">
+              Your intelligent assistant for inbox, calendar, and beyond.
+            </p>
+            <div className="agent-suggestions">
+              {SUGGESTIONS.map((s) => (
+                <div key={s.label} className="agent-suggestion">
+                  <span className="agent-suggestion-dot" />
+                  <s.icon size={14} />
+                  {s.label}
                 </div>
-                <span className="text-xs text-zinc-500">Agent soch raha hai...</span>
+              ))}
+            </div>
+          </div>
+        )}
+        {messages.map((m: any) => {
+          const isUser = m.role === 'user';
+          return (
+            <div key={m.id} className={`agent-msg-row ${isUser ? 'user' : 'agent'}`}>
+              <div className="agent-msg-avatar">
+                {isUser ? <User size={16} /> : <Bot size={16} />}
+              </div>
+              <div className="agent-msg-body">
+                <span className="agent-msg-label">{isUser ? 'You' : 'Agent'}</span>
+                <div className="agent-bubble">
+                  {m.content ? (
+                    <span>{m.content}</span>
+                  ) : m.parts ? (
+                    m.parts.map((part: any, i: number) => {
+                      if (part.type === 'text' && part.text) {
+                        return <span key={i}>{part.text}</span>;
+                      }
+                      return null;
+                    })
+                  ) : (
+                    <span>No content</span>
+                  )}
+                </div>
+                {(() => {
+                  const tools =
+                    m.toolInvocations ||
+                    (m.parts
+                      ? m.parts.filter(
+                          (p: any) =>
+                            p.type === 'tool-invocation' ||
+                            p.type === 'tool' ||
+                            p.type === 'dynamic-tool'
+                        )
+                      : []);
+                  return tools.length > 0 ? <ActionLog toolInvocations={tools} /> : null;
+                })()}
+              </div>
+            </div>
+          );
+        })}
+        {isLoading && (
+          <div className="agent-msg-row agent agent-thinking-row">
+            <div className="agent-msg-avatar">
+              <Bot size={16} />
+            </div>
+            <div className="agent-msg-body">
+              <span className="agent-msg-label">Agent</span>
+              <div className="agent-thinking-bubble">
+                <span className="agent-thinking-dots">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                <span>Thinking...</span>
               </div>
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
-
       {/* Input */}
-      <div className="p-5 border-t border-zinc-100 bg-white shrink-0">
+      <form className="agent-input-wrap" onSubmit={handleSubmit}>
         {voiceState === 'listening' && (
-          <div className="flex items-center gap-3 mb-3 px-2">
-            <div className="px-3 py-1.5 rounded-full bg-blue-50 flex items-center gap-2 border border-blue-100">
-              <Waveform active={true} />
-              <span className="text-[10px] font-bold tracking-widest text-blue-600 uppercase">
-                Listening
-              </span>
+          <div className="agent-listening">
+            <div className="agent-listening-pill">
+              <Waveform active={false} />
+              Listening
             </div>
           </div>
         )}
-
-        <form
-          onSubmit={handleSubmit}
-          className="flex items-center bg-zinc-50 border border-zinc-200 rounded-2xl p-2 focus-within:border-zinc-300 focus-within:bg-white focus-within:shadow-sm transition-all"
-        >
-          <div className="pl-3 pr-2 text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer shrink-0">
-            <Paperclip className="w-5 h-5" />
-          </div>
-          <input
+        <div className="agent-input-shell">
+          <textarea
             ref={inputRef}
-            type="text"
+            className="agent-input"
             value={input}
             onChange={handleInputChange}
-            placeholder="Ask Agent anything..."
-            className="flex-1 bg-transparent border-none focus:outline-none text-[15px] text-zinc-900 px-2 placeholder:text-zinc-400 min-w-0"
+            onKeyDown={handleKeyDown}
+            placeholder="Ask Corsair anything..."
+            rows={1}
           />
-          <div className="flex items-center gap-2 pr-1 shrink-0">
+          <div className="agent-input-actions">
+            <button type="button" className="agent-input-btn" aria-label="Attach">
+              <Paperclip size={16} />
+            </button>
             <button
               type="button"
+              className={`agent-input-btn mic ${voiceState === 'listening' ? 'listening' : ''}`}
               onClick={toggleListening}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${voiceState === 'listening' ? 'bg-[#FECDD3] text-[#881337] hover:bg-[#FDA4AF]' : 'bg-transparent text-zinc-400 hover:bg-zinc-200 hover:text-zinc-700'}`}
+              aria-label="Voice"
             >
-              <Mic className="w-5 h-5" />
+              <Mic size={16} />
             </button>
             <button
               type="submit"
-              disabled={!input || input.trim() === ''}
-              className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="agent-send-btn"
+              disabled={!input.trim() || isLoading}
+              aria-label="Send"
             >
-              <ArrowUp className="w-5 h-5" />
+              <ArrowUp size={18} strokeWidth={2.4} />
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 }
-
 function ActionLog({ toolInvocations }: { toolInvocations: any[] }) {
   const [logOpen, setLogOpen] = useState(false);
-
   return (
-    <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden mt-3 shadow-sm">
-      <button
-        onClick={() => setLogOpen(!logOpen)}
-        className="w-full flex items-center justify-between p-4 bg-zinc-50 hover:bg-zinc-100 transition-colors"
-      >
-        <div className="flex items-center gap-2 text-[11px] font-bold tracking-widest uppercase">
-          {logOpen ? (
-            <ChevronDown className="w-4 h-4 text-[#1E4C82]" />
-          ) : (
-            <ChevronRight className="w-4 h-4 text-[#1E4C82]" />
-          )}
-          <span className="text-[#1E4C82]">Action Log</span>
-          <span className="text-zinc-400">· {toolInvocations.length} calls</span>
-        </div>
+    <div className="agent-actionlog">
+      <button type="button" onClick={() => setLogOpen(!logOpen)} className="agent-actionlog-header">
+        <span className="agent-actionlog-left">
+          {logOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          Action Log
+          <span className="agent-actionlog-count">· {toolInvocations.length} calls</span>
+        </span>
       </button>
       {logOpen && (
-        <div className="p-4 space-y-4 border-t border-zinc-100 bg-white">
+        <div className="agent-actionlog-body">
           {toolInvocations.map((tool, idx) => {
             const state =
               tool.state === 'output-available' || tool.state === 'result'
@@ -277,8 +270,8 @@ function ActionLog({ toolInvocations }: { toolInvocations: any[] }) {
                 : 'running...';
             return (
               <ToolCallItem
-                key={tool.toolCallId || idx}
-                name={tool.toolName}
+                key={idx}
+                name={tool.toolName || tool.name || 'tool'}
                 state={state}
                 input={inputStr}
                 output={outputStr}
@@ -290,7 +283,6 @@ function ActionLog({ toolInvocations }: { toolInvocations: any[] }) {
     </div>
   );
 }
-
 function ToolCallItem({
   name,
   state,
@@ -303,26 +295,17 @@ function ToolCallItem({
   output: string;
 }) {
   return (
-    <div className="text-[12px] font-mono">
-      <div className="flex items-center gap-2 mb-2">
-        <div
-          className={`w-2 h-2 rounded-full ${state === 'result' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}
-        />
-        <span
-          className={`${state === 'result' ? 'text-emerald-600' : 'text-amber-600'} font-bold uppercase tracking-widest`}
-        >
-          Tool Call
-        </span>
-        <span className="text-zinc-500 font-semibold">{name}</span>
+    <div className="agent-tool">
+      <div className="agent-tool-head">
+        <span className="agent-tool-badge">{state}</span>
+        <span className="agent-tool-name">{name}</span>
       </div>
-      <div className="bg-zinc-50 border border-zinc-100 rounded-xl p-4 ml-4 space-y-3 overflow-x-auto">
-        <div>
-          <span className="text-amber-600 font-bold">Input:</span>{' '}
-          <span className="text-zinc-700 whitespace-pre-wrap">{input}</span>
+      <div>
+        <div className="agent-tool-block">
+          <span className="agent-tool-label">Input:</span> {input}
         </div>
-        <div>
-          <span className="text-emerald-600 font-bold">Output:</span>{' '}
-          <span className="text-zinc-700 whitespace-pre-wrap">{output}</span>
+        <div className="agent-tool-block">
+          <span className="agent-tool-label">Output:</span> {output}
         </div>
       </div>
     </div>
