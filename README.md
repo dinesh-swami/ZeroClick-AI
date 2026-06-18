@@ -1,4 +1,33 @@
+
+## Getting Started
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Generate the Prisma client:
+
+```bash
+npx prisma generate
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Open the app:
+
+```text
+http://localhost:3000
+```
+
 # ZeroClick AI
+
+
 
 Beautiful, fast, AI-powered email and calendar workflow assistant built for the Corsair hackathon.
 
@@ -128,21 +157,7 @@ ZeroClick-AI/
 - `GET /api/digest` - Trigger digest generation
 - `GET /api/sse` - Realtime event stream endpoint
 
-## Database Models
 
-The Prisma schema includes:
-
-- `User` - user account, auth provider, Corsair connection state
-- `Team` - team ownership and member relationships
-- `Email` - cached email metadata, body, priority, and vector embedding
-- `DigestCache` - generated daily digest storage
-- `FollowUp` - scheduled follow-up tasks
-- `WebhookLog` - persisted webhook payload history
-- `VerificationToken` - email verification tokens
-- `CorsairIntegration` - Corsair integration metadata
-- `CorsairAccount` - Corsair account connection data
-- `CorsairEntity` - synced Corsair entity cache
-- `CorsairEvent` - Corsair event cache/log table
 
 ## Environment Variables
 
@@ -172,31 +187,6 @@ OPENAI_API_KEY="your-openai-api-key"
 RESEND_API_KEY="your-resend-api-key"
 ```
 
-## Getting Started
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Generate the Prisma client:
-
-```bash
-npx prisma generate
-```
-
-Run the development server:
-
-```bash
-npm run dev
-```
-
-Open the app:
-
-```text
-http://localhost:3000
-```
 
 ## Useful Commands
 
@@ -208,19 +198,6 @@ npm run lint      # Run ESLint
 npm run tunnel    # Start ngrok tunnel for local webhook testing
 ```
 
-## Webhook Testing
-
-For local realtime email events, expose the local app with ngrok:
-
-```bash
-npm run tunnel
-```
-
-Then configure your Corsair webhook URL to point to:
-
-```text
-https://YOUR_NGROK_URL/api/webhooks/corsair
-```
 
 The webhook route logs events, checks idempotency in Redis, maps incoming Gmail events into the app email format, and publishes them to a user-specific Redis channel for realtime UI updates.
 
