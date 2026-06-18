@@ -16,23 +16,30 @@ import {
   ChevronDown,
   Mic,
   type LucideIcon,
+  Bell,
 } from 'lucide-react';
 
 import { useAuth } from '@/hooks/useAuth';
 import '@/styles/side.css';
+import { useRouter } from 'next/navigation';
+
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const [sidebarWidth, setSidebarWidth] = useState(220);
+  const [sidebarWidth, setSidebarWidth] = useState(300);
 
   const navigation: { name: string; href: string; icon: LucideIcon; badge?: string }[] = [
-    { name: 'Inbox', href: '/inbox', icon: Inbox },
+    { name: 'MailBox', href: '/inbox', icon: Inbox },
     { name: 'Calendar', href: '/calendar', icon: Calendar },
-    { name: 'Voice Agent (Soon...)', href: '/digest', icon: Mic },
-    { name: 'Agent', href: '/agent', icon: Bot },
-    { name: 'Settings', href: '/settings', icon: Settings },
-  ];
+    { name: 'Chat', href: '/agent', icon: Bot },
+    { name: 'Tools', href: '/settings', icon: Settings },
+    { name: 'Notifications ', href: '/notifications', icon: Bell, badge: 'UPCOMING...' },
 
+    { name: 'Voice Agent ', href: '/digest', icon: Mic, badge: 'UPCOMING...' },
+
+    { name: 'Profile ', href: '/profile', icon: User, badge: 'UPCOMING...' },
+  ];
+  const router = useRouter();
   // Extract user initials
   const initials = user?.name
     ? user.name
@@ -83,7 +90,7 @@ export default function Sidebar() {
       />
 
       {/* Brand */}
-      <div className="zc-brand">
+      <div className="zc-brand" onClick={() => router.push('/inbox')}>
         <div className="zc-brand-icon">
           <Flame className="zc-brand-flame" />
           <span className="zc-brand-icon-glow" />
@@ -104,8 +111,11 @@ export default function Sidebar() {
             >
               {isActive && <span className="zc-nav-active-bar" />}
               <Icon className="zc-nav-icon" />
-              <span className="zc-nav-label">{item.name}</span>
-              {item.badge && <span className="zc-nav-badge">{item.badge}</span>}
+              <div className="zc-nav-content">
+                <span className="zc-nav-label">{item.name}</span>
+
+                {item.badge && <span className="zc-soon-badge">{item.badge}</span>}
+              </div>
             </Link>
           );
         })}
@@ -122,7 +132,7 @@ export default function Sidebar() {
         </div>
         <div className="zc-user-info">
           <p className="zc-user-name">{user?.name || 'Cleans'}</p>
-          <p className="zc-user-email">{user?.email || 'aali1100@gmail.com'}</p>
+          <p className="zc-user-email">{user?.email || 'TestEmail@gmail.com'}</p>
         </div>
         <ChevronDown className="zc-user-chevron" />
       </div>

@@ -198,11 +198,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+
   box-shadow:
     inset 0 0 0 1px rgba(255, 200, 140, 0.45),
     inset 0 -6px 12px rgba(120, 20, 0, 0.5),
     0 0 22px rgba(255, 120, 0, 0.6),
     0 6px 20px rgba(255, 80, 0, 0.45);
+}
+
+.zc-brand-icon:hover {
+  transform: translateY(-6px);
+
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 200, 140, 0.45),
+    inset 0 -6px 12px rgba(120, 20, 0, 0.5),
+    0 0 35px rgba(255, 120, 0, 0.8),
+    0 12px 30px rgba(255, 80, 0, 0.6);
 }
 .zc-brand-flame {
   width: 22px;
@@ -225,6 +239,7 @@
   letter-spacing: -0.02em;
   color: #ffffff;
   text-shadow: 0 0 18px rgba(255, 120, 0, 0.3);
+  cursor: pointer;
 }
 
 /* ============ Navigation ============ */
@@ -433,5 +448,52 @@
   .zc-ember,
   .zc-brand-icon-glow {
     animation: none !important;
+  }
+}
+.zc-nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.zc-soon-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+
+  padding: 3px 8px;
+  border-radius: 999px;
+
+  color: #ffb347;
+
+  background: rgba(255, 140, 0, 0.12);
+
+  border: 1px solid rgba(255, 140, 0, 0.35);
+
+  box-shadow:
+    0 0 10px rgba(255, 140, 0, 0.2),
+    inset 0 0 10px rgba(255, 140, 0, 0.08);
+
+  animation: soonPulse 5s infinite;
+}
+
+@keyframes soonPulse {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 0 10px rgba(255, 140, 0, 0.2),
+      inset 0 0 10px rgba(255, 140, 0, 0.08);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow:
+      0 0 20px rgba(255, 140, 0, 0.4),
+      inset 0 0 12px rgba(255, 140, 0, 0.15);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

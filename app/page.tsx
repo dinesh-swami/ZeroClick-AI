@@ -2,51 +2,83 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
+import '../styles/mainpage.css';
 
 export default function LandingPage() {
   const { user, isLoading } = useAuth();
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#F9FAFB] text-zinc-900 font-sans">
-      <div className="max-w-2xl text-center space-y-8 px-4">
-        <h1 className="text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-600">
-          ZeroClick Ai for Everyone
-        </h1>
-        <p className="text-xl text-zinc-500">
-          You can connect you email and calendar and it will give you experience ever made. Powered
-          by Corsair, integrated with everything you need.
-        </p>
+    <div className="hero-page">
+      {/* Full-bleed background layer (100%) */}
+      <div className="hero-bg-full" />
 
-        <div className="pt-8 min-h-[80px]">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-12 space-x-2">
-              <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce"></div>
-            </div>
-          ) : user ? (
-            <Link
-              href="/inbox"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm"
-            >
-              Go to Inbox
-            </Link>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/login"
-                className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm"
-              >
-                Log In
+      {/* Framed background layer (90%, rounded, sits like a frame) */}
+      <div className="hero-frame-wrapper">
+        <div className="hero-bg-framed" />
+
+        {/* Drifting smoke wisps for fire/smoke atmosphere */}
+        <div className="hero-smoke" aria-hidden="true">
+          <span className="smoke-wisp s1" />
+          <span className="smoke-wisp s2" />
+          <span className="smoke-wisp s3" />
+          <span className="smoke-wisp s4" />
+        </div>
+
+        {/* Ambient floating ember particles for extra interactivity */}
+        <div className="hero-particles" aria-hidden="true">
+          <span className="particle p1" />
+          <span className="particle p2" />
+          <span className="particle p3" />
+          <span className="particle p4" />
+          <span className="particle p5" />
+          <span className="particle p6" />
+          <span className="particle p7" />
+          <span className="particle p8" />
+          <span className="particle p9" />
+          <span className="particle p10" />
+        </div>
+
+        <div className="hero-content">
+          <h1 className="hero-title">
+            <span className="hero-title-line hero-title-silver">ZeroClick AI for</span>
+            <span className="hero-title-line hero-title-accent">Everyone</span>
+          </h1>
+
+          <p className="hero-subtitle">
+            You can connect you email and calendar and it will give you experience ever made.
+            Powered by Corsair, integrated with everything you need.
+          </p>
+
+          <div className="hero-cta">
+            {isLoading ? (
+              <div className="hero-loading">
+                <span className="hero-dot" />
+                <span className="hero-dot" />
+                <span className="hero-dot" />
+              </div>
+            ) : user ? (
+              <Link href="/inbox" className="hero-btn hero-btn-primary">
+                <span className="hero-btn-glow" aria-hidden="true" />
+                <span className="hero-btn-label">Go to Inbox</span>
+                <span className="hero-btn-arrow" aria-hidden="true">
+                  &rarr;
+                </span>
               </Link>
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center px-8 py-4 text-base font-medium text-zinc-900 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-all duration-200 shadow-sm hover:border-zinc-300"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
+            ) : (
+              <div className="hero-cta-group">
+                <Link href="/login" className="hero-btn hero-btn-primary">
+                  <span className="hero-btn-glow" aria-hidden="true" />
+                  <span className="hero-btn-label">Log In</span>
+                  <span className="hero-btn-arrow" aria-hidden="true">
+                    &rarr;
+                  </span>
+                </Link>
+                <Link href="/register" className="hero-btn hero-btn-secondary">
+                  <span className="hero-btn-label">Sign Up</span>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
