@@ -5,6 +5,7 @@ import { z } from 'zod';
 /**
  * 1. Smart Chips Detection
  * Detects if an incoming email contains a meeting request or a bug/feature request
+ * Detects if an incoming email contains a meeting request or a bug/feature request
  * so the UI can render "Add to calendar" or "Create Linear issue" chips.
  */
 export async function detectSmartChips(
