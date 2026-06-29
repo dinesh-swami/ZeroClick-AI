@@ -11,11 +11,3 @@ export const SearchEmailSchema = z.object({
 });
 
 // We can add other schemas here as needed for other email-related operations.
-// We can add other schemas here as needed for other email-related operations.
-// We can add other schemas here as needed for other email-related operations.
-// We can add other schemas here as needed for other email-related operations.
-// We can add other schemas here as needed for other email-related operations.
-// We can add other schemas here as needed for other email-related operations.
-// We can add other schemas here as needed for other email-related operations.
-// We can add other schemas here as needed for other email-related operations.
-// We can add other schemas here as needed for other email-related operations.
